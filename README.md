@@ -5,7 +5,7 @@
 ![](https://img.shields.io/badge/node-8.9.3-green.svg) 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pryomoax/json-decoder/master/LICENSE)
 
-`json-decoder` allowes TypeScript and JavaScript projects to adorn class declarations with JSON decoding decorators to support automatic decoding and marshalling of JSON objects to full prototype objects.
+`json-decoder` allows TypeScript and JavaScript projects to adorn class declarations with JSON decoding decorators to support automatic decoding and marshalling of JSON objects to full prototype objects.
 
 **This module is not read for consumption and is a work in progress**
 
