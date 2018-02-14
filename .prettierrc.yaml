@@ -1,0 +1,10 @@
+# .prettierrc
+printWidth: 120
+parser: typescript
+arrowParens: 'always'
+bracketSpacing: true
+singleQuote: true
+semi: false
+tabWidth: 4
+trailingComma: any
+useTabs: false

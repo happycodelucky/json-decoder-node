@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "strictNullChecks": true,
+        "alwaysStrict": true,
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "es2017",
+        "module": "commonjs",
+        "outDir": "dist",
+        "sourceMap": true,
+        "watch": true
+    },
+    "compileOnSave": true,
+    "include": [
+        "*.ts",
+        "examples/**/*.ts",
+        "lib/**/*.ts"
+    ],
+    "exclude":[
+        "node_modules"
+    ]
+}
