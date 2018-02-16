@@ -527,6 +527,9 @@ function toNumber(value) {
     if (value === undefined) {
         return undefined;
     }
+    if (value === null) {
+        return Number.NaN;
+    }
     if (typeof value === 'number') {
         return value;
     }
@@ -540,21 +543,21 @@ function toNumber(value) {
         if (trimmedValue.startsWith('0x') || trimmedValue.startsWith('0X')) {
             const matches = /^[0-9A-F]+$/.exec(trimmedValue.slice(2));
             if (!matches) {
-                return undefined;
+                return Number.NaN;
             }
             return Number.parseInt(matches[0], 16) * factor;
         }
         else if (trimmedValue.startsWith('0b')) {
             const matches = /^[01]+$/.exec(trimmedValue.slice(2));
             if (!matches) {
-                return undefined;
+                return Number.NaN;
             }
             return Number.parseInt(matches[0], 2) * factor;
         }
         else {
             const matches = /^[0-9,]*([\.][0-9]+([Ee][+-][0-9]+)?)?$/.exec(trimmedValue);
             if (!matches) {
-                return undefined;
+                return Number.NaN;
             }
             const matchedValue = matches[0].replace(',', '');
             if (matches.length > 1) {
@@ -572,7 +575,7 @@ function toNumber(value) {
  * @param value - a value
  */
 function toString(value) {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     if (typeof value === 'string') {
@@ -585,7 +588,7 @@ function toString(value) {
  * @param value - a value
  */
 function toObject(value) {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     if (typeof value === 'object') {
@@ -598,12 +601,17 @@ function toObject(value) {
  * @param value - only can use String values
  */
 function toURL(value) {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined;
     }
     if (typeof value !== 'string') {
         return undefined;
     }
-    return new url_1.URL(value);
+    try {
+        return new url_1.URL(value);
+    }
+    catch (_a) {
+        return undefined;
+    }
 }
 //# sourceMappingURL=json-decoder.js.map

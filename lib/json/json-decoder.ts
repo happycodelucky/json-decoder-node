@@ -578,6 +578,9 @@ function toNumber(value: any): number | undefined {
     if (value === undefined) {
         return undefined
     }
+    if (value === null) {
+        return Number.NaN
+    }
 
     if (typeof value === 'number') {
         return value
@@ -592,19 +595,19 @@ function toNumber(value: any): number | undefined {
         if (trimmedValue.startsWith('0x') || trimmedValue.startsWith('0X')) {
             const matches = /^[0-9A-F]+$/.exec(trimmedValue.slice(2))
             if (!matches) {
-                return undefined
+                return Number.NaN
             }
             return Number.parseInt(matches[0], 16) * factor
         } else if (trimmedValue.startsWith('0b')) {
             const matches = /^[01]+$/.exec(trimmedValue.slice(2))
             if (!matches) {
-                return undefined
+                return Number.NaN
             }
             return Number.parseInt(matches[0], 2) * factor
         } else {
             const matches = /^[0-9,]*([\.][0-9]+([Ee][+-][0-9]+)?)?$/.exec(trimmedValue)
             if (!matches) {
-                return undefined
+                return Number.NaN
             }
 
             const matchedValue = matches[0].replace(',', '')
@@ -624,7 +627,7 @@ function toNumber(value: any): number | undefined {
  * @param value - a value
  */
 function toString(value: any): string | undefined {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined
     }
 
@@ -640,7 +643,7 @@ function toString(value: any): string | undefined {
  * @param value - a value
  */
 function toObject(value: any): object | undefined {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined
     }
 
@@ -656,7 +659,7 @@ function toObject(value: any): object | undefined {
  * @param value - only can use String values
  */
 function toURL(value: any): URL | undefined {
-    if (value === undefined) {
+    if (value === undefined || value === null) {
         return undefined
     }
 
@@ -664,5 +667,9 @@ function toURL(value: any): URL | undefined {
         return undefined
     }
 
-    return new URL(value)
+    try {
+        return new URL(value)
+    } catch {
+        return undefined
+    }
 }
