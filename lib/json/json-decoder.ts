@@ -8,7 +8,8 @@ import 'reflect-metadata'
 
 import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderMetadataKeys } from '../decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder-map'
-import { JsonConvertable } from './json-decodable-types'
+import { JsonConvertable, JsonObject } from './json-decodable-types'
+import { URL } from 'url'
 
 /**
  * 
@@ -33,13 +34,18 @@ export const JsonDecoderMetadataKeys = {
      * Metadata for the JSON schema
      */
     schema: Symbol.for('jsonDecoder.schema'),
+
+    /**
+     * JSON context object
+     */
+    context: Symbol.for('jsonDecoder.context'),
 }
 
 /**
  * 
  * @param options 
  */
-export function jsonDecodable(options: any) {
+export function jsonDecodable(options?: any) {
     return <T extends DecoderPrototypalTarget>(target: T): T & JsonConvertable => {
         console.log(`Applying jsonDecodable for ${target.name}`)
         Reflect.defineMetadata(DecoderMetadataKeys.decodable, true, target)
@@ -61,6 +67,22 @@ export function jsonSchema<T extends DecoderPrototypalTarget>(target: T): T {
     Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, true, target)
 
     return target
+}
+
+/**
+ * JSON context object assigned to decoding object
+ * Also addes `toJSON()` to return the decoded object back
+ */
+export function jsonContext<T extends DecoderConstructableTarget>(target: T, key: string) {
+    console.log(`Applying jsonContext for ${target.constructor.name}.${key}`)
+    Reflect.defineMetadata(JsonDecoderMetadataKeys.context, key, target.constructor)
+
+    // Defined toJSON if not already defined
+    if (!('toJSON' in target)) {
+        target['toJSON'] = function toJSON() {
+            return Object.assign({}, this[key])
+        }
+    }
 }
 
 /**
@@ -227,7 +249,7 @@ export class JsonDecoder {
      * @param object 
      * @return
      */
-    static decode<T extends Object>(objectOrString: string | object, classType: DecoderPrototypalTarget): T | null {
+    static decode<T extends Object>(objectOrString: string | JsonObject, classType: DecoderPrototypalTarget): T | null {
         if (objectOrString === null || objectOrString === undefined) {
             return null
         }
@@ -265,6 +287,12 @@ export class JsonDecoder {
             decodeObject = <T>Object.create(classType.prototype)  
         }
 
+        // Check if a context needs to be set
+        const contextKey = Reflect.getMetadata(JsonDecoderMetadataKeys.context, classType)
+        if (contextKey) {
+            decodeObject[contextKey] = object
+        }
+        
         // Walk the prototype chain, adding the constructor functions in reverse order
         const classConstructors: Array<DecoderPrototypalTarget> = []
         let prototype = classType.prototype
@@ -350,7 +378,7 @@ export class JsonDecoder {
      * @param object 
      * @return 
      */
-    static decodeArray<T extends Object>(objectOrString: string | Array<Object>, classType: DecoderPrototypalTarget): [T] | null {
+    static decodeArray<T extends Object>(objectOrString: string | Array<JsonObject>, classType: DecoderPrototypalTarget): [T] | null {
         if (objectOrString === null || objectOrString === undefined) {
             return null
         }
@@ -427,6 +455,8 @@ function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decode
             conversionFunction = toString
         } else if (elementType === Object) {
             conversionFunction = toObject
+        } else if (elementType === URL) {
+            conversionFunction = toURL
         } else if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, elementType)) {
             // Element type might be decodable, so decode it
             conversionFunction = (value: any) => {
@@ -542,7 +572,7 @@ function toBoolean(value: any, strict: boolean = false): boolean | undefined {
  * 
  * @param value - value to conver to a number
  * 
- * @return parsed number or NaN
+ * @return parsed number, NaN, or undefined
  */
 function toNumber(value: any): number | undefined {
     if (value === undefined) {
@@ -590,8 +620,8 @@ function toNumber(value: any): number | undefined {
 }
 
 /**
- * 
- * @param value 
+ * Converts a value to a String
+ * @param value - a value
  */
 function toString(value: any): string | undefined {
     if (value === undefined) {
@@ -606,8 +636,8 @@ function toString(value: any): string | undefined {
 }
 
 /**
- * 
- * @param value 
+ * Converts a value to an Object
+ * @param value - a value
  */
 function toObject(value: any): object | undefined {
     if (value === undefined) {
@@ -619,4 +649,20 @@ function toObject(value: any): object | undefined {
     }
 
     return { value }
+}
+
+/**
+ * Converts a string to a URL
+ * @param value - only can use String values
+ */
+function toURL(value: any): URL | undefined {
+    if (value === undefined) {
+        return undefined
+    }
+
+    if (typeof value !== 'string') {
+        return undefined
+    }
+
+    return new URL(value)
 }

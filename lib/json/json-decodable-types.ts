@@ -58,3 +58,10 @@ export interface JsonConvertableCollectionType {
  * JSON decodable types allowed in marshalling
  */
 export type JsonDecodableType = ConvertableBasicConstructionType | JsonConvertable | JsonConvertableCollectionType
+
+/**
+ * Generic JSON object
+ */
+export interface JsonObject {
+    readonly [key: string]: any | undefined
+}

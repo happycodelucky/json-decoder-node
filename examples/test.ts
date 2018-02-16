@@ -1,11 +1,12 @@
-import { JsonDecoder, jsonDecodable } from '../'
-import { jsonProperty, jsonPropertyAlias, jsonPropertyHandler, jsonDecoder, jsonDecoderCompleted } from '../'
+import { JsonDecoder, jsonDecodable, JsonObject } from '../'
+import { jsonContext, jsonProperty, jsonPropertyAlias, jsonPropertyHandler, jsonDecoder, jsonDecoderCompleted } from '../'
 
-@jsonDecodable({
-    schema: {},
-})
+@jsonDecodable()
 //@jsonSchema()
 export class Account {
+
+    @jsonContext
+    public readonly context: JsonObject
 
     /**
      * Simple JSON property, takes property name as key

@@ -1,7 +1,7 @@
 {
   "name": "json-decoder",
   "version": "0.1.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^9.4.4",
