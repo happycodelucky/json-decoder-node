@@ -31,15 +31,7 @@ exports.decoderMapForTarget = decoderMapForTarget;
  * @param decoderMap - decoder map to assign to the class type
  */
 function setDecoderMapForTarget(target, decoderMap) {
-    // // Remove the existing map, if specified
-    // delete target[DecoderMetadataKeys.decoderMap]
     Reflect.defineMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderMap, decoderMap, target);
-    // Object.defineProperty(target, DecoderMetadataKeys.decoderMap, {
-    //     enumerable: true,
-    //     configurable: true,
-    //     writable: false,
-    //     value: decoderMap,
-    // })
 }
 exports.setDecoderMapForTarget = setDecoderMapForTarget;
 //# sourceMappingURL=decoder-map.js.map

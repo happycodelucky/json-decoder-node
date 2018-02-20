@@ -14,6 +14,10 @@ exports.DecoderMetadataKeys = {
      */
     decodable: Symbol.for('decoder.decodable'),
     /**
+     * Decoder options set during declaration
+     */
+    decodableOptions: Symbol.for('decoder.options'),
+    /**
      * Represents the decoder map as part of a class
      */
     decoderMap: Symbol.for('decoder.map'),

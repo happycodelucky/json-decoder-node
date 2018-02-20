@@ -9,6 +9,7 @@ import 'reflect-metadata'
 import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderMetadataKeys } from '../decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder-map'
 import { JsonConvertable, JsonObject } from './json-decodable-types'
+import { marshallerForType } from '../marshallers/marshallers'
 import { URL } from 'url'
 
 /**
@@ -23,7 +24,12 @@ export interface JsonDecodableOptions {
     /**
      * Strict mode
      */
-    strict: boolean 
+    strict?: boolean 
+
+    /**
+     * When true will call the constructor function
+     */
+    useConstructor?: boolean
 }
 
 /** 
@@ -42,16 +48,25 @@ export const JsonDecoderMetadataKeys = {
 }
 
 /**
- * 
+ * Declare a class as being decodable
  * @param options 
  */
-export function jsonDecodable(options?: any) {
+export function jsonDecodable(options?: JsonDecodableOptions) {
     return <T extends DecoderPrototypalTarget>(target: T): T & JsonConvertable => {
         console.log(`Applying jsonDecodable for ${target.name}`)
         Reflect.defineMetadata(DecoderMetadataKeys.decodable, true, target)
 
-        const map = decoderMapForTarget(target);
-        (<T & JsonConvertable> target).fromJSON = () => {}
+        // Decodable options
+        const decodableOptions = Object.assign({}, options)
+        delete decodableOptions.schema
+        Reflect.defineMetadata(DecoderMetadataKeys.decodableOptions, decodableOptions, target)
+
+        // JSON schema
+        if (options && options.schema) {
+            Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, options.schema, target)
+        }
+
+        // const map = decoderMapForTarget(target);
         // TODO: Output the decoder map for the target. Needs to be sanitize to output correctly
 
         return <T & JsonConvertable> target
@@ -246,8 +261,9 @@ export class JsonDecoder {
 
     /**
      * Decodes a JSON object or String returning back the object if it was able to be decoded
-     * @param object 
-     * @return
+     * @param objectOrString - JSON object or string to decode
+     * @param classType - Decodeable class type
+     * @return results of the decoding
      */
     static decode<T extends Object>(objectOrString: string | JsonObject, classType: DecoderPrototypalTarget): T | null {
         if (objectOrString === null || objectOrString === undefined) {
@@ -283,8 +299,15 @@ export class JsonDecoder {
             }
         }
         if (!decodeObject) {
-            // Instantiate the object, without calling the constructor
-            decodeObject = <T>Object.create(classType.prototype)  
+            const options = <JsonDecodableOptions> Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, classType)
+            if (options && options.useConstructor) {
+                const constructable = <ObjectConstructor> classType
+                decodeObject = new constructable()
+            } else {
+                // Instantiate the object, without calling the constructor
+                decodeObject = <T>Object.create(classType.prototype)  
+            }
+
         }
 
         // Check if a context needs to be set
@@ -401,7 +424,18 @@ export class JsonDecoder {
 // Private functions
 //
 
-function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decodeObject: Object): any | undefined {
+/**
+ * Evaluates a property of an object (being decoded) based on a map entry for the decoder.
+ * 
+ * @param object - object being decoded
+ * @param mapEntry - decoder map entry
+ * @param decodeObject - object being populated by the decoder
+ * @param strict - when true, parsing is strict and throws a TypeError if the value cannot be converted
+ * @returns evaluated property value
+ * 
+ * @throws TypeError
+ */
+function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decodeObject: Object, strict: boolean = false): any {
     if (!object) {
         return undefined
     }
@@ -409,6 +443,7 @@ function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decode
         return undefined
     }
 
+    // Ensure consistent use of DecoderMapEntry
     let decoderMapEntry: DecoderMapEntry 
     if (typeof mapEntry === 'string') {
         decoderMapEntry = {
@@ -444,37 +479,39 @@ function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decode
     if (decoderMapEntry.type) {
         const elementType = Array.isArray(decoderMapEntry.type) ? decoderMapEntry.type[0] : decoderMapEntry.type
 
-        let conversionFunction
-        if (elementType === Array) {
-            conversionFunction = toArray        
-        } else if (elementType === Boolean) {
-            conversionFunction = toBoolean
-        } else if (elementType === Number) {
-            conversionFunction = toNumber
-        } else if (elementType === String) {
-            conversionFunction = toString
-        } else if (elementType === Object) {
-            conversionFunction = toObject
-        } else if (elementType === URL) {
-            conversionFunction = toURL
-        } else if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, elementType)) {
+        let conversionFunction = marshallerForType(elementType)
+        if (!conversionFunction && Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, elementType)) {
             // Element type might be decodable, so decode it
             conversionFunction = (value: any) => {
                 if (typeof value === 'string' || (typeof value === 'object' && value !== null)) {
                     return JsonDecoder.decode(value, elementType)
                 }
+
+                if (strict) {
+                    throw new TypeError(`${typeof value} cannot be converted to ${elementType.name}`)
+                }
                 
                 return undefined
             }
         } else {
-            // TODO: Strict should assert?
+            if (strict) {
+                throw new TypeError(`${elementType.name} is not a JSON decodable type`)
+            }
+
             return undefined
         }
 
         if (conversionFunction) {
             if (Array.isArray(decoderMapEntry.type)) {
                 // Handle array conversion
-                value = toArray(value).map(conversionFunction)
+                const arrayValue = marshallerForType(Array)!(value, strict)
+                if (arrayValue === undefined) {
+                    return undefined
+                } else {
+                    value = arrayValue
+                        .map(itemValue => conversionFunction!(itemValue, strict))
+                        .filter(itemValue => itemValue !== undefined)
+                }
             } else if (Array.isArray(value)) {
                 // Handle reverse array conversion
                 if (value.length === 0) {
@@ -484,15 +521,14 @@ function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decode
                 if (value === undefined) {
                     return undefined
                 }
-                value = conversionFunction(value)
+                value = conversionFunction(value, strict)
             } else {
                 // Handle basic conversion
-                value = conversionFunction(value)
+                value = conversionFunction(value, strict)
             }
         }
 
         // If there is no value, it should be skipped
-        // TODO: Strict should assert?
         if (value === undefined) {
             return undefined
         }
@@ -500,176 +536,7 @@ function evaluatePropertyValue(object: Object, mapEntry: DecoderMapEntry, decode
         if (decoderMapEntry.mapFunction) {
             value = decoderMapEntry.mapFunction.call(decodeObject, value, object)
         }
-        // No need to check for undefined, it's a user function and the user is in control
     }
 
     return value
-}
-
-/**
- * Converts a value to a simple array
- * @param value - value to convert to an array
- */
-function toArray(value: any): Array<any> {
-    if (value === undefined) {
-        return []
-    }
-
-    if (Array.isArray(value)) {
-        return value
-    }
-
-    return [value]
-}
-
-/**
- * Converts a JSON value to a Boolean, if possible
- * 
- * @param value - value to conver to a number
- * @param strict - when true, parsing is strict and returns undefined if not able to be parsed
- * 
- * @return parsed boolean or undefined
- */
-function toBoolean(value: any, strict: boolean = false): boolean | undefined {
-    if (value === undefined) {
-        return undefined
-    }
-
-    if (typeof value === 'boolean') {
-        return value
-    }
-
-    if (typeof value === 'string') {
-        if (/$[ \t]*(true|yes|1)[ \t]*^/i.test(value)) {
-            return true
-        } else if (strict) {
-            // Strict requires exact match to false
-            if (/$[ \t]*(false|no|0)[ \t]*^/i.test(value)) {
-                return false
-            }
-        } else {
-            // Non-strict
-            return false
-        }
-    } else if (typeof value === 'number') {
-        if (!strict) {
-            return value !== 0
-        }
-
-        // Non-strict
-        if (value === 0) {
-            return false
-        } else if (value === 1) {
-            return true
-        }   
-    }
-
-    return undefined
-}
-
-/**
- * Converts a JSON value to a Number, if possible
- * 
- * @param value - value to conver to a number
- * 
- * @return parsed number, NaN, or undefined
- */
-function toNumber(value: any): number | undefined {
-    if (value === undefined) {
-        return undefined
-    }
-    if (value === null) {
-        return Number.NaN
-    }
-
-    if (typeof value === 'number') {
-        return value
-    }
-
-    if (typeof value === 'boolean') {
-        return value ? 1 : 0
-    } else if (typeof value === 'string') {
-        let trimmedValue = value.trim()
-        const prefixMatch = /^([-+])?[ \t]*/.exec(trimmedValue)
-        const factor = (prefixMatch && prefixMatch[1] === '-') ? -1 : 1
-        if (trimmedValue.startsWith('0x') || trimmedValue.startsWith('0X')) {
-            const matches = /^[0-9A-F]+$/.exec(trimmedValue.slice(2))
-            if (!matches) {
-                return Number.NaN
-            }
-            return Number.parseInt(matches[0], 16) * factor
-        } else if (trimmedValue.startsWith('0b')) {
-            const matches = /^[01]+$/.exec(trimmedValue.slice(2))
-            if (!matches) {
-                return Number.NaN
-            }
-            return Number.parseInt(matches[0], 2) * factor
-        } else {
-            const matches = /^[0-9,]*([\.][0-9]+([Ee][+-][0-9]+)?)?$/.exec(trimmedValue)
-            if (!matches) {
-                return Number.NaN
-            }
-
-            const matchedValue = matches[0].replace(',', '')
-            if (matches.length > 1) {
-                return Number.parseFloat(matches[0]) * factor
-            } else {
-                return Number.parseInt(matches[0], 10) * factor
-            }   
-        }
-    }
-
-    return Number.NaN
-}
-
-/**
- * Converts a value to a String
- * @param value - a value
- */
-function toString(value: any): string | undefined {
-    if (value === undefined || value === null) {
-        return undefined
-    }
-
-    if (typeof value === 'string') {
-        return value
-    }
-
-    return value.toString()
-}
-
-/**
- * Converts a value to an Object
- * @param value - a value
- */
-function toObject(value: any): object | undefined {
-    if (value === undefined || value === null) {
-        return undefined
-    }
-
-    if (typeof value === 'object') {
-        return value
-    }
-
-    return { value }
-}
-
-/**
- * Converts a string to a URL
- * @param value - only can use String values
- */
-function toURL(value: any): URL | undefined {
-    if (value === undefined || value === null) {
-        return undefined
-    }
-
-    if (typeof value !== 'string') {
-        return undefined
-    }
-
-    try {
-        return new URL(value)
-    } catch {
-        return undefined
-    }
 }

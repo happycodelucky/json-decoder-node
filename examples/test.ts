@@ -1,7 +1,9 @@
 import { JsonDecoder, jsonDecodable, JsonObject } from '../'
 import { jsonContext, jsonProperty, jsonPropertyAlias, jsonPropertyHandler, jsonDecoder, jsonDecoderCompleted } from '../'
 
-@jsonDecodable()
+@jsonDecodable({
+    useConstructor: true,
+})
 //@jsonSchema()
 export class Account {
 
@@ -36,7 +38,7 @@ export class Account {
      * @jsonDecoder can be used on a static function to create the object as desired
      */
     constructor() {
-        console.log('I will never be called')
+        console.log('I\'m called only because of the of the use of \'useConstructor\'')
     }
 
     /**
@@ -70,18 +72,18 @@ export class Account {
      * @param json - JSON objec to decode
      * @return Created object to use as the destination for a decode
      */
-    @jsonDecoder
-    private static decode(json: Object): Account | null {
-        console.log(`Creating JSON object ${JSON.stringify(json)}`)
+    // @jsonDecoder
+    // private static decode(json: Object): Account | null {
+    //     console.log(`Creating JSON object ${JSON.stringify(json)}`)
 
-        if ('obj' in json) {
-            // Example of calling the native constructor
-            return new Account2()
-        } else {
-            return new Account()
-        }
+    //     if ('obj' in json) {
+    //         // Example of calling the native constructor
+    //         return new Account2()
+    //     } else {
+    //         return new Account()
+    //     }
 
-    }
+    // }
 
     /**
      * Called when decoding has completed, all properties assigned and handlers called.

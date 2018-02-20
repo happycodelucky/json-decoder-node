@@ -13,7 +13,7 @@ class Account {
     constructor() {
         // PROBLEM!
         this.bar = 10;
-        console.log('I will never be called');
+        console.log('I\'m called only because of the of the use of \'useConstructor\'');
     }
     /**
      * A property handler, called when a property is found in the JSON. Multiple handler can be registered, if needs
@@ -42,16 +42,16 @@ class Account {
      * @param json - JSON objec to decode
      * @return Created object to use as the destination for a decode
      */
-    static decode(json) {
-        console.log(`Creating JSON object ${JSON.stringify(json)}`);
-        if ('obj' in json) {
-            // Example of calling the native constructor
-            return new Account2();
-        }
-        else {
-            return new Account_1();
-        }
-    }
+    // @jsonDecoder
+    // private static decode(json: Object): Account | null {
+    //     console.log(`Creating JSON object ${JSON.stringify(json)}`)
+    //     if ('obj' in json) {
+    //         // Example of calling the native constructor
+    //         return new Account2()
+    //     } else {
+    //         return new Account()
+    //     }
+    // }
     /**
      * Called when decoding has completed, all properties assigned and handlers called.
      * Note, if the decoding has been aborted this will not be called
@@ -89,11 +89,10 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     _2.jsonDecoderCompleted
 ], Account.prototype, "decodeComplete", null);
-tslib_1.__decorate([
-    _2.jsonDecoder
-], Account, "decode", null);
 Account = Account_1 = tslib_1.__decorate([
-    _1.jsonDecodable()
+    _1.jsonDecodable({
+        useConstructor: true,
+    })
     //@jsonSchema()
 ], Account);
 exports.Account = Account;
@@ -136,5 +135,5 @@ const account = _1.JsonDecoder.decodeArray(json, Account);
 if (account) {
 }
 var Account_1;
-//const f: JsonConvertableCollectionType = [Array, Account] 
+//const f: JsonConvertableCollectionType = [Array, Account]
 //# sourceMappingURL=test.js.map
