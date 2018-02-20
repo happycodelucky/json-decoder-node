@@ -73,15 +73,5 @@ export function decoderMapForTarget(target: DecoderPrototypalTarget): DecoderMap
  * @param decoderMap - decoder map to assign to the class type
  */
 export function setDecoderMapForTarget(target: DecoderPrototypalTarget, decoderMap: DecoderMap) {
-    // // Remove the existing map, if specified
-    // delete target[DecoderMetadataKeys.decoderMap]
-
     Reflect.defineMetadata(DecoderMetadataKeys.decoderMap, decoderMap, target)
-
-    // Object.defineProperty(target, DecoderMetadataKeys.decoderMap, {
-    //     enumerable: true,
-    //     configurable: true,
-    //     writable: false,
-    //     value: decoderMap,
-    // })
 }
