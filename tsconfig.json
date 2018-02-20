@@ -15,7 +15,8 @@
     "include": [
         "*.ts",
         "examples/**/*.ts",
-        "lib/**/*.ts"
+        "lib/**/*.ts",
+        "test/**/*.ts"
     ],
     "exclude":[
         "node_modules"

@@ -14,6 +14,24 @@
             "showAsyncStacks": true,
             "smartStep": false,
             "protocol": "inspector"
-        }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "protocol": "inspector",
+            "name": "Mocha Tests",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+            "runtimeArgs": [
+                "--inspect"
+            ],
+            "args": [
+                "-r", "ts-node/register",
+                "-r", "test/prepare",
+                "test/**/*.spec.ts",
+                "--colors",
+                "-t", "100000"
+            ],
+            "internalConsoleOptions": "openOnSessionStart"
+        }  
     ]
 }

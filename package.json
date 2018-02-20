@@ -1,11 +1,43 @@
 {
   "name": "json-decoder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^9.4.4",
     "reflect-metadata": "^0.1.12",
     "tslib": "^1.9.0"
-  }
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.0",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/mocha": "^2.2.46",
+    "@types/nock": "^9.1.1",
+    "@types/sinon": "^4.1.2",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "3.5.3",
+    "mocha-jenkins-reporter": "^0.3.10",
+    "mocha-typescript": "^1.1.12",
+    "nock": "^9.1.5",
+    "nyc": "^11.4.1",
+    "redis-mock": "^0.21.0",
+    "sinon": "^4.1.4",
+    "source-map-support": "^0.5.3",
+    "ts-node": "^4.1.0",
+    "typescript": "^2.6.2"
+  },
+  "scripts": {
+    "test": "nyc mocha -r ts-node/register -r test/prepare test/**/*.spec.ts --reporter mocha-jenkins-reporter"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "sourceMap": true,
+    "instrument": true
+  }  
 }
