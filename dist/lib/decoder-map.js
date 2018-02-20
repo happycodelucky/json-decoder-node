@@ -19,7 +19,7 @@ function decoderMapForTarget(target) {
     if (map) {
         return map;
     }
-    // Set an empty decoder map 
+    // Set an empty decoder map
     setDecoderMapForTarget(target, {});
     return Reflect.getOwnMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderMap, target);
 }

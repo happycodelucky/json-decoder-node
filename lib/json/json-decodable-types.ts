@@ -1,10 +1,10 @@
 /**
  * @module json-decoder
- * 
+ *
  * JSON specific types an interfaces
  */
 
-import { ArrayConvertable, ConvertableBasicType, ConvertableBasicConstructionType} from '../decodable-types'
+import { ArrayConvertable, ConvertableBasicType, ConvertableBasicConstructionType } from '../decodable-types'
 import { ConvertableCollectionType, ConvertableType } from '../decodable-types'
 export * from '../decodable-types'
 
@@ -51,7 +51,7 @@ export interface JsonConvertableCollectionType {
     /**
      * Element type
      */
-    '1'?: ConvertableBasicConstructionType | JsonConvertableFunction | JsonConvertable,
+    '1'?: ConvertableBasicConstructionType | JsonConvertableFunction | JsonConvertable
 }
 
 /**

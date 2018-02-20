@@ -20,7 +20,7 @@ exports.JsonDecoderMetadataKeys = {
     /**
      * JSON context object
      */
-    context: Symbol.for('jsonDecoder.context'),
+    context: Symbol.for('jsonDecoder.context')
 };
 /**
  * Declare a class as being decodable
@@ -81,7 +81,7 @@ function jsonProperty(target, key) {
     console.log(`Applying jsonProperty for ${target.constructor.name}.${key}`);
     const map = decoder_map_1.decoderMapForTarget(target.constructor);
     map[key] = {
-        key,
+        key
     };
 }
 exports.jsonProperty = jsonProperty;
@@ -120,7 +120,7 @@ function jsonPropertyAlias(keyPath, type, mapFunction) {
             map[key] = {
                 key: keyPath || key,
                 type,
-                mapFunction,
+                mapFunction
             };
         }
         else {
@@ -316,7 +316,7 @@ class JsonDecoder {
                     for (const handler of handlers) {
                         const value = evaluatePropertyValue(object, {
                             key: handler.key,
-                            type: handler.type,
+                            type: handler.type
                         }, decodeObject);
                         if (value !== undefined) {
                             // TODO: Capture errors from handlers
@@ -364,7 +364,7 @@ class JsonDecoder {
         else {
             throw new TypeError('decode(object) should be an Array of Objects or a String');
         }
-        return objects.map(object => this.decode(object, classType)).filter(object => !!object);
+        return objects.map((object) => this.decode(object, classType)).filter((object) => !!object);
     }
 }
 exports.JsonDecoder = JsonDecoder;
@@ -393,7 +393,7 @@ function evaluatePropertyValue(object, mapEntry, decodeObject, strict = false) {
     let decoderMapEntry;
     if (typeof mapEntry === 'string') {
         decoderMapEntry = {
-            key: mapEntry,
+            key: mapEntry
         };
     }
     else {
@@ -449,8 +449,8 @@ function evaluatePropertyValue(object, mapEntry, decodeObject, strict = false) {
                 }
                 else {
                     value = arrayValue
-                        .map(itemValue => conversionFunction(itemValue, strict))
-                        .filter(itemValue => itemValue !== undefined);
+                        .map((itemValue) => conversionFunction(itemValue, strict))
+                        .filter((itemValue) => itemValue !== undefined);
                 }
             }
             else if (Array.isArray(value)) {

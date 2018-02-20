@@ -1,6 +1,6 @@
 /**
  * @module json-decoder
- * 
+ *
  * Decoder basic types
  */
 
@@ -13,7 +13,12 @@ export interface ConvertableFunction {
 
 /** */
 export type ConvertableBasicType = Boolean | Number | String | Object
-export type ConvertableBasicConstructionType = typeof Boolean | typeof Number | typeof String | typeof Object | ConvertableFunction
+export type ConvertableBasicConstructionType =
+    | typeof Boolean
+    | typeof Number
+    | typeof String
+    | typeof Object
+    | ConvertableFunction
 
 /**
  * Array convertable type
@@ -44,12 +49,17 @@ export interface ConvertableCollectionType {
     /**
      * Collection type
      */
-    '0': typeof Array | typeof Set | typeof Map | ArrayConvertable<ConvertableBasicType> | ArrayConvertableFunction<ConvertableBasicType>
+    '0':
+        | typeof Array
+        | typeof Set
+        | typeof Map
+        | ArrayConvertable<ConvertableBasicType>
+        | ArrayConvertableFunction<ConvertableBasicType>
 
     /**
      * Element type
      */
-    '1': ConvertableBasicConstructionType,
+    '1': ConvertableBasicConstructionType
 }
 
 /**

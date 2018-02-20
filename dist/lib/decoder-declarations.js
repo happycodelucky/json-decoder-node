@@ -36,6 +36,6 @@ exports.DecoderMetadataKeys = {
     /**
      * Custom decoder completion function on class prototype
      */
-    decoderCompleted: Symbol.for('decoder.decoderCompleted'),
+    decoderCompleted: Symbol.for('decoder.decoderCompleted')
 };
 //# sourceMappingURL=decoder-declarations.js.map

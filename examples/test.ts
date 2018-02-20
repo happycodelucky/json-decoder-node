@@ -1,30 +1,34 @@
 import { JsonDecoder, jsonDecodable, JsonObject } from '../'
-import { jsonContext, jsonProperty, jsonPropertyAlias, jsonPropertyHandler, jsonDecoder, jsonDecoderCompleted } from '../'
+import {
+    jsonContext,
+    jsonProperty,
+    jsonPropertyAlias,
+    jsonPropertyHandler,
+    jsonDecoder,
+    jsonDecoderCompleted
+} from '../'
 
 @jsonDecodable({
-    useConstructor: true,
+    useConstructor: true
 })
 //@jsonSchema()
 export class Account {
-
-    @jsonContext
-    public readonly context: JsonObject
+    @jsonContext public readonly context: JsonObject
 
     /**
      * Simple JSON property, takes property name as key
      */
-    @jsonProperty
-    public readonly name: string
+    @jsonProperty public readonly name: string
 
     /**
      * Aliased property, takes 'i' as the key, and marshals the value to an array of Number
      * There is also a map function that takes the marshaled results and applies a function to each
      */
-    @jsonPropertyAlias('i', [Number], (values: Array<number>) => values.map(value => value * 2))
+    @jsonPropertyAlias('i', [Number], (values: Array<number>) => values.map((value) => value * 2))
     public readonly index: Array<number>
 
     /**
-     * Alias property that looks up a nested property. 
+     * Alias property that looks up a nested property.
      * In this case, object 'obj', take the array value of 'foo' and use index '1' in foo's array
      */
     @jsonPropertyAlias('obj.foo@1', [String])
@@ -38,7 +42,7 @@ export class Account {
      * @jsonDecoder can be used on a static function to create the object as desired
      */
     constructor() {
-        console.log('I\'m called only because of the of the use of \'useConstructor\'')
+        console.log("I'm called only because of the of the use of 'useConstructor'")
     }
 
     /**
@@ -55,7 +59,7 @@ export class Account {
 
     /**
      * Called as a custom (initial) decoder, called before any other decoder mapping internals.
-     * 
+     *
      * @param json - Original JSON object used during decoding
      * @return true|1|this|undefined to indicate to keep decoding, false|0|null to abort decoding. May also return
      * a new object of the same type to replace the object being decoded
@@ -66,9 +70,9 @@ export class Account {
     }
 
     /**
-     * A static variant, this acts as a factory function to perform decoding. If an instance version of 
+     * A static variant, this acts as a factory function to perform decoding. If an instance version of
      * @jsonDecoder method exists, it will be called on the returned object.
-     * 
+     *
      * @param json - JSON objec to decode
      * @return Created object to use as the destination for a decode
      */
@@ -88,7 +92,7 @@ export class Account {
     /**
      * Called when decoding has completed, all properties assigned and handlers called.
      * Note, if the decoding has been aborted this will not be called
-     * 
+     *
      * @param json - Original JSON object used during decoding
      */
     @jsonDecoderCompleted
@@ -107,9 +111,8 @@ export class Account {
 
 @jsonDecodable({})
 class Account2 extends Account {
-
     /**
-     * Alias property that looks up a nested property. 
+     * Alias property that looks up a nested property.
      * In this case, object 'obj', take the array value of 'foo' and use index '1' in foo's array
      */
     @jsonPropertyAlias('obj.foo@0', Number)
@@ -118,7 +121,7 @@ class Account2 extends Account {
     /**
      * Called when decoding has completed, all properties assigned and handlers called.
      * Note, if the decoding has been aborted this will not be called
-     * 
+     *
      * @param json - Original JSON object used during decoding
      */
     @jsonDecoderCompleted
@@ -129,23 +132,22 @@ class Account2 extends Account {
 
 // Sample JSON
 const json = [
-    { 
-        name: 'test', 
-        i: '0b1001', 
-        obj: { 
-            foo: ['1', '2'] 
-        },
+    {
+        name: 'test',
+        i: '0b1001',
+        obj: {
+            foo: ['1', '2']
+        }
     },
-    { 
-        name: 'test2', 
-        i: '0xFF' 
+    {
+        name: 'test2',
+        i: '0xFF'
     }
 ]
 
 // Decode JSON and create Account
 const account = JsonDecoder.decodeArray(json, Account)
-if (account){
-    
+if (account) {
 }
 
 //const f: JsonConvertableCollectionType = [Array, Account]

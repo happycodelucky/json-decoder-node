@@ -13,7 +13,7 @@ class Account {
     constructor() {
         // PROBLEM!
         this.bar = 10;
-        console.log('I\'m called only because of the of the use of \'useConstructor\'');
+        console.log("I'm called only because of the of the use of 'useConstructor'");
     }
     /**
      * A property handler, called when a property is found in the JSON. Multiple handler can be registered, if needs
@@ -75,7 +75,7 @@ tslib_1.__decorate([
     _2.jsonProperty
 ], Account.prototype, "name", void 0);
 tslib_1.__decorate([
-    _2.jsonPropertyAlias('i', [Number], (values) => values.map(value => value * 2))
+    _2.jsonPropertyAlias('i', [Number], (values) => values.map((value) => value * 2))
 ], Account.prototype, "index", void 0);
 tslib_1.__decorate([
     _2.jsonPropertyAlias('obj.foo@1', [String])
@@ -91,7 +91,7 @@ tslib_1.__decorate([
 ], Account.prototype, "decodeComplete", null);
 Account = Account_1 = tslib_1.__decorate([
     _1.jsonDecodable({
-        useConstructor: true,
+        useConstructor: true
     })
     //@jsonSchema()
 ], Account);
@@ -123,7 +123,7 @@ const json = [
         i: '0b1001',
         obj: {
             foo: ['1', '2']
-        },
+        }
     },
     {
         name: 'test2',

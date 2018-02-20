@@ -4,10 +4,10 @@
 
 /**
  * Converts a JSON value to a Boolean, if possible.
- * 
+ *
  * @param value - value to convert to a Boolean
  * @param strict - when true, parsing is strict and returns undefined if not able to be parsed
- * 
+ *
  * @return parsed Boolean or undefined
  */
 export function toBoolean(value: any, strict: boolean = false): boolean | undefined {
@@ -30,12 +30,12 @@ export function toBoolean(value: any, strict: boolean = false): boolean | undefi
         // Strict requires exact match to false
         if (/^[ \t]*(false|no|0)[ \t]*$/i.test(value)) {
             return false
-        } 
+        }
 
         if (strict) {
             throw new TypeError(`'${value}' does not represent a Boolean`)
         }
-        
+
         return undefined
     } else if (typeof value === 'number') {
         if (!strict) {

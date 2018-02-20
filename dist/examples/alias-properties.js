@@ -33,7 +33,7 @@ const json = {
     decimal: '1001',
     hex: '0xFF',
     binary: '0b10101010',
-    float: '12.3E-5',
+    float: '12.3E-5'
 };
 // const example = JsonDecoder.decode(json, NumberAliasExamples)
 // console.log('NumberAliasExamples')
@@ -62,7 +62,7 @@ const json2 = {
     string: 'true',
     number: 1,
     reverseArray: ['false', true],
-    toArray: true,
+    toArray: true
 };
 const example2 = _1.JsonDecoder.decode(json2, BooleanAliasExamples);
 console.log('BooleanAliasExamples');
@@ -93,9 +93,9 @@ const aliasJson = {
         simple: 'nested-simple',
         array: ['nested-array-0', 'nested-array-1'],
         doubleNested: {
-            simpleNumber: 5,
+            simpleNumber: 5
         }
-    },
+    }
 };
 const aliasExample = _1.JsonDecoder.decode(aliasJson, AliasExamples);
 console.log('AliasExamples');
@@ -103,23 +103,28 @@ console.log(JSON.stringify(aliasExample, undefined, '  '));
 let MapFunctionExamples = class MapFunctionExamples {
 };
 tslib_1.__decorate([
-    _2.jsonPropertyAlias('values', [Number], (values) => values.map(value => value.toString()))
+    _2.jsonPropertyAlias('values', [Number], (values) => values.map((value) => value.toString()))
 ], MapFunctionExamples.prototype, "base10String", void 0);
 tslib_1.__decorate([
-    _2.jsonPropertyAlias('values', [Number], (values) => values.map(value => `0x${value.toString(16).toUpperCase()}`))
+    _2.jsonPropertyAlias('values', [Number], (values) => values.map((value) => `0x${value.toString(16).toUpperCase()}`))
 ], MapFunctionExamples.prototype, "base16String", void 0);
 tslib_1.__decorate([
-    _2.jsonPropertyAlias('values', [Number], (values) => values.reduce((value, acc) => { return acc + value; }, 0))
+    _2.jsonPropertyAlias('values', [Number], (values) => values.reduce((value, acc) => {
+        return acc + value;
+    }, 0))
 ], MapFunctionExamples.prototype, "accumalator", void 0);
 tslib_1.__decorate([
-    _2.jsonPropertyAlias('welcome', String, (value) => value.split('').reverse().join(''))
+    _2.jsonPropertyAlias('welcome', String, (value) => value
+        .split('')
+        .reverse()
+        .join(''))
 ], MapFunctionExamples.prototype, "string", void 0);
 MapFunctionExamples = tslib_1.__decorate([
     _1.jsonDecodable({})
 ], MapFunctionExamples);
 const mapFunctionJson = {
     welcome: 'Hello World',
-    values: ['1', '0b101', '0xFF', '2.3333'],
+    values: ['1', '0b101', '0xFF', '2.3333']
 };
 const mapFunctionExample = _1.JsonDecoder.decode(mapFunctionJson, MapFunctionExamples);
 console.log('MapFunctionExamples');

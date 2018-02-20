@@ -4,10 +4,10 @@
 
 /**
  * Converts a JSON value to a Number, if possible
- * 
+ *
  * @param value - value to convert to a Number
  * @param strict - when true, parsing is strict and throws a TypeError if the value cannot be converted
- * 
+ *
  * @return parsed number, NaN, or undefined
  */
 export function toNumber(value: any, strict: boolean = false): number | undefined {
@@ -33,20 +33,18 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
         if (prefixMatch && prefixMatch[0].length) {
             trimmedValue = trimmedValue.slice(prefixMatch[0].length)
         }
-        const factor = (prefixMatch && prefixMatch[1] === '-') ? -1 : 1
+        const factor = prefixMatch && prefixMatch[1] === '-' ? -1 : 1
 
         if (trimmedValue.startsWith('0x') || trimmedValue.startsWith('0X')) {
             const matches = /^[0-9A-F]+$/i.exec(trimmedValue.slice(2))
             if (matches) {
                 return Number.parseInt(matches[0], 16) * factor
             }
-            
         } else if (trimmedValue.startsWith('0b') || trimmedValue.startsWith('0B')) {
             const matches = /^[01]+$/.exec(trimmedValue.slice(2))
             if (matches) {
                 return Number.parseInt(matches[0], 2) * factor
             }
-            
         } else {
             const matches = /^[0-9,]*([\.])?([0-9]+)?([Ee][+-]?[0-9]+)?$/.exec(trimmedValue)
             if (matches) {
@@ -55,7 +53,7 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
                     return Number.parseFloat(matchedValue) * factor
                 } else {
                     return Number.parseInt(matchedValue, 10) * factor
-                }    
+                }
             }
         }
 
@@ -66,6 +64,6 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
 
     if (strict) {
         throw new TypeError(`'${typeof value} cannot be converted to a Number`)
-    }    
+    }
     return Number.NaN
 }

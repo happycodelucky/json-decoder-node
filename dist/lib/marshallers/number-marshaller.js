@@ -33,7 +33,7 @@ function toNumber(value, strict = false) {
         if (prefixMatch && prefixMatch[0].length) {
             trimmedValue = trimmedValue.slice(prefixMatch[0].length);
         }
-        const factor = (prefixMatch && prefixMatch[1] === '-') ? -1 : 1;
+        const factor = prefixMatch && prefixMatch[1] === '-' ? -1 : 1;
         if (trimmedValue.startsWith('0x') || trimmedValue.startsWith('0X')) {
             const matches = /^[0-9A-F]+$/i.exec(trimmedValue.slice(2));
             if (matches) {

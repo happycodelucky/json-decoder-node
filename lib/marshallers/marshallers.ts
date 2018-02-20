@@ -2,7 +2,7 @@
  * @module json-decoder
  */
 
-import { DecoderPrototypalTarget  } from '../decoder-declarations'
+import { DecoderPrototypalTarget } from '../decoder-declarations'
 import { toArray } from './array-marshaller'
 import { toBoolean } from './boolean-marshaller'
 import { toNumber } from './number-marshaller'
@@ -22,7 +22,7 @@ marshallers.set(URL, toURL)
 
 /**
  * Returns a marshaller function for a given type
- * 
+ *
  * @param type - Type to return a marshaller for
  * @returns marshaller function or undefined if not built-in
  */
