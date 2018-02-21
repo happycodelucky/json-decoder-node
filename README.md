@@ -13,7 +13,7 @@
 
 | Version | Description                              |
 | :-----: | ---------------------------------------- |
-|  0.1.0  | In Progress  |
+|  0.1.x  | In Progress  |
 
 ## Distributions
 
