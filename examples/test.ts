@@ -5,6 +5,7 @@ import {
     jsonPropertyAlias,
     jsonPropertyHandler,
     jsonDecoder,
+    jsonDecoderFactory,
     jsonDecoderCompleted
 } from '../'
 
@@ -76,18 +77,18 @@ export class Account {
      * @param json - JSON objec to decode
      * @return Created object to use as the destination for a decode
      */
-    // @jsonDecoder
-    // private static decode(json: Object): Account | null {
-    //     console.log(`Creating JSON object ${JSON.stringify(json)}`)
+    @jsonDecoderFactory
+    private static decode(json: Object): Account | null {
+        console.log(`Creating JSON object ${JSON.stringify(json)}`)
 
-    //     if ('obj' in json) {
-    //         // Example of calling the native constructor
-    //         return new Account2()
-    //     } else {
-    //         return new Account()
-    //     }
+        if ('obj' in json) {
+            // Example of calling the native constructor
+            return new Account2()
+        } else {
+            return new Account()
+        }
 
-    // }
+    }
 
     /**
      * Called when decoding has completed, all properties assigned and handlers called.

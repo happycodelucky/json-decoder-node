@@ -42,16 +42,16 @@ class Account {
      * @param json - JSON objec to decode
      * @return Created object to use as the destination for a decode
      */
-    // @jsonDecoder
-    // private static decode(json: Object): Account | null {
-    //     console.log(`Creating JSON object ${JSON.stringify(json)}`)
-    //     if ('obj' in json) {
-    //         // Example of calling the native constructor
-    //         return new Account2()
-    //     } else {
-    //         return new Account()
-    //     }
-    // }
+    static decode(json) {
+        console.log(`Creating JSON object ${JSON.stringify(json)}`);
+        if ('obj' in json) {
+            // Example of calling the native constructor
+            return new Account2();
+        }
+        else {
+            return new Account_1();
+        }
+    }
     /**
      * Called when decoding has completed, all properties assigned and handlers called.
      * Note, if the decoding has been aborted this will not be called
@@ -89,6 +89,9 @@ tslib_1.__decorate([
 tslib_1.__decorate([
     _2.jsonDecoderCompleted
 ], Account.prototype, "decodeComplete", null);
+tslib_1.__decorate([
+    _2.jsonDecoderFactory
+], Account, "decode", null);
 Account = Account_1 = tslib_1.__decorate([
     _1.jsonDecodable({
         useConstructor: true

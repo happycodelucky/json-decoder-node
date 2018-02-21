@@ -6,11 +6,15 @@
 
 import 'reflect-metadata'
 
+import * as createDebugLog from 'debug'
 import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderMetadataKeys } from '../decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder-map'
 import { JsonConvertable, JsonObject } from './json-decodable-types'
 import { marshallerForType } from '../marshallers/marshallers'
 import { URL } from 'url'
+
+// Debug logger
+const debug = console.log//createDebugLog('decoder:json')
 
 /**
  *
@@ -53,7 +57,7 @@ export const JsonDecoderMetadataKeys = {
  */
 export function jsonDecodable(options?: JsonDecodableOptions) {
     return <T extends DecoderPrototypalTarget>(target: T): T & JsonConvertable => {
-        console.log(`Applying jsonDecodable for ${target.name}`)
+        debug(`${target.name} applying jsonDecodable with options ${JSON.stringify(options)}`)
         Reflect.defineMetadata(DecoderMetadataKeys.decodable, true, target)
 
         // Decodable options
@@ -78,7 +82,7 @@ export function jsonDecodable(options?: JsonDecodableOptions) {
  * @param options
  */
 export function jsonSchema<T extends DecoderPrototypalTarget>(target: T): T {
-    console.log(`Applying jsonSchema for ${target.name}`)
+    debug(`${target.name} applying jsonSchema`)
     Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, true, target)
 
     return target
@@ -89,7 +93,7 @@ export function jsonSchema<T extends DecoderPrototypalTarget>(target: T): T {
  * Also addes `toJSON()` to return the decoded object back
  */
 export function jsonContext<T extends DecoderConstructableTarget>(target: T, key: string) {
-    console.log(`Applying jsonContext for ${target.constructor.name}.${key}`)
+    debug(`${target.constructor.name} applying jsonContext to ${key}`)
     Reflect.defineMetadata(JsonDecoderMetadataKeys.context, key, target.constructor)
 
     // Defined toJSON if not already defined
@@ -109,7 +113,7 @@ export function jsonContext<T extends DecoderConstructableTarget>(target: T, key
  *   public name: string
  */
 export function jsonProperty<T extends DecoderConstructableTarget>(target: T, key: string) {
-    console.log(`Applying jsonProperty for ${target.constructor.name}.${key}`)
+    debug(`${target.constructor.name} applying jsonProperty to ${key}`)
 
     const map = decoderMapForTarget(target.constructor)
     map[key] = {
@@ -150,8 +154,13 @@ export function jsonPropertyAlias(
     }
 
     return (target: DecoderConstructableTarget, key: string) => {
-        console.log(`Applying jsonPropertyAlias for ${target.constructor.name}.${key}`)
-
+        const elementType = Array.isArray(type) ? type[0] : type
+        if (elementType) {
+            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}, marshalling using ${elementType.name}`)
+        } else {
+            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}`)
+        }
+        
         const map = decoderMapForTarget(target.constructor)
 
         // Assign the property to the map
@@ -190,7 +199,7 @@ export function jsonPropertyHandler(keyPath: string, type?: DecoderPrototypalTar
         key: string,
         descriptor: PropertyDescriptor
     ): PropertyDescriptor => {
-        console.log(`Applying jsonPropertyHandler for ${target.constructor.name}.${key}`)
+        debug(`${target.constructor.name} applying jsonPropertyHandler ${keyPath} to ${key}`)
 
         let notifiers: Map<String, Array<DecoderMapAliasEntry>> = Reflect.getOwnMetadata(
             DecoderMetadataKeys.decoderNotifiers,
@@ -215,8 +224,8 @@ export function jsonPropertyHandler(keyPath: string, type?: DecoderPrototypalTar
     }
 }
 
-export function jsonDecoderFactory(target: object, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    console.log(`Applying jsonDecoder for ${target[key].name}`)
+export function jsonDecoderFactory(target: DecoderPrototypalTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+    debug(`${target.name} applying jsonDecoderFactory to ${key}`)
     Reflect.defineMetadata(DecoderMetadataKeys.decoderFactory, target[key], target)
     return descriptor
 }
@@ -240,8 +249,8 @@ export function jsonDecoderFactory(target: object, key: string, descriptor: Prop
  *   @jsonDecoder
  *   function decoder(json: Object): MyClass | null { ... }
  */
-export function jsonDecoder(target: object, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    console.log(`Applying jsonDecoder for ${target[key].name}`)
+export function jsonDecoder(target: DecoderConstructableTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+    debug(`${target.constructor.name} applying jsonDecoder to ${key}`)
     Reflect.defineMetadata(DecoderMetadataKeys.decoder, target[key], target)
     return descriptor
 }
@@ -259,8 +268,8 @@ export function jsonDecoder(target: object, key: string, descriptor: PropertyDes
  *   @jsonDecoderComplete
  *   function decoder(json: Object): MyClass | null { ... }
  */
-export function jsonDecoderCompleted(target: object, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    console.log(`Applying jsonDecoderCompleted for ${target[key].name}`)
+export function jsonDecoderCompleted(target: DecoderConstructableTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+    debug(`${target.constructor.name} applying jsonDecoderCompleted to ${key}`)
     Reflect.defineMetadata(DecoderMetadataKeys.decoderCompleted, target[key], target)
     return descriptor
 }
@@ -294,7 +303,7 @@ export class JsonDecoder {
         let decodeObject
 
         // Create our decoding object using a decoder function if registered
-        const objectFactory = Reflect.getMetadata(DecoderMetadataKeys.decoder, classType)
+        const objectFactory = Reflect.getMetadata(DecoderMetadataKeys.decoderFactory, classType)
         if (objectFactory) {
             decodeObject = objectFactory.call(classType, object)
 

@@ -9,6 +9,8 @@ require("reflect-metadata");
 const decoder_declarations_1 = require("../decoder-declarations");
 const decoder_map_1 = require("../decoder-map");
 const marshallers_1 = require("../marshallers/marshallers");
+// Debug logger
+const debug = console.log; //createDebugLog('decoder:json')
 /**
  * Reflection metadata keys
  */
@@ -28,7 +30,7 @@ exports.JsonDecoderMetadataKeys = {
  */
 function jsonDecodable(options) {
     return (target) => {
-        console.log(`Applying jsonDecodable for ${target.name}`);
+        debug(`${target.name} applying jsonDecodable with options ${JSON.stringify(options)}`);
         Reflect.defineMetadata(decoder_declarations_1.DecoderMetadataKeys.decodable, true, target);
         // Decodable options
         const decodableOptions = Object.assign({}, options);
@@ -49,7 +51,7 @@ exports.jsonDecodable = jsonDecodable;
  * @param options
  */
 function jsonSchema(target) {
-    console.log(`Applying jsonSchema for ${target.name}`);
+    debug(`${target.name} applying jsonSchema`);
     Reflect.defineMetadata(exports.JsonDecoderMetadataKeys.schema, true, target);
     return target;
 }
@@ -59,7 +61,7 @@ exports.jsonSchema = jsonSchema;
  * Also addes `toJSON()` to return the decoded object back
  */
 function jsonContext(target, key) {
-    console.log(`Applying jsonContext for ${target.constructor.name}.${key}`);
+    debug(`${target.constructor.name} applying jsonContext to ${key}`);
     Reflect.defineMetadata(exports.JsonDecoderMetadataKeys.context, key, target.constructor);
     // Defined toJSON if not already defined
     if (!('toJSON' in target)) {
@@ -78,7 +80,7 @@ exports.jsonContext = jsonContext;
  *   public name: string
  */
 function jsonProperty(target, key) {
-    console.log(`Applying jsonProperty for ${target.constructor.name}.${key}`);
+    debug(`${target.constructor.name} applying jsonProperty to ${key}`);
     const map = decoder_map_1.decoderMapForTarget(target.constructor);
     map[key] = {
         key
@@ -113,7 +115,13 @@ function jsonPropertyAlias(keyPath, type, mapFunction) {
         throw new TypeError('jsonPropertyAlias(type) should have exactly one element for Array types');
     }
     return (target, key) => {
-        console.log(`Applying jsonPropertyAlias for ${target.constructor.name}.${key}`);
+        const elementType = Array.isArray(type) ? type[0] : type;
+        if (elementType) {
+            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}, marshalling using ${elementType.name}`);
+        }
+        else {
+            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}`);
+        }
         const map = decoder_map_1.decoderMapForTarget(target.constructor);
         // Assign the property to the map
         if (type !== undefined) {
@@ -147,7 +155,7 @@ function jsonPropertyHandler(keyPath, type) {
         throw new TypeError('jsonPropertyHandler(type) should have exactly one element for Array types');
     }
     return (target, key, descriptor) => {
-        console.log(`Applying jsonPropertyHandler for ${target.constructor.name}.${key}`);
+        debug(`${target.constructor.name} applying jsonPropertyHandler ${keyPath} to ${key}`);
         let notifiers = Reflect.getOwnMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderNotifiers, target.constructor);
         if (!notifiers) {
             notifiers = new Map();
@@ -168,7 +176,7 @@ function jsonPropertyHandler(keyPath, type) {
 }
 exports.jsonPropertyHandler = jsonPropertyHandler;
 function jsonDecoderFactory(target, key, descriptor) {
-    console.log(`Applying jsonDecoder for ${target[key].name}`);
+    debug(`${target.name} applying jsonDecoderFactory to ${key}`);
     Reflect.defineMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderFactory, target[key], target);
     return descriptor;
 }
@@ -193,7 +201,7 @@ exports.jsonDecoderFactory = jsonDecoderFactory;
  *   function decoder(json: Object): MyClass | null { ... }
  */
 function jsonDecoder(target, key, descriptor) {
-    console.log(`Applying jsonDecoder for ${target[key].name}`);
+    debug(`${target.constructor.name} applying jsonDecoder to ${key}`);
     Reflect.defineMetadata(decoder_declarations_1.DecoderMetadataKeys.decoder, target[key], target);
     return descriptor;
 }
@@ -212,7 +220,7 @@ exports.jsonDecoder = jsonDecoder;
  *   function decoder(json: Object): MyClass | null { ... }
  */
 function jsonDecoderCompleted(target, key, descriptor) {
-    console.log(`Applying jsonDecoderCompleted for ${target[key].name}`);
+    debug(`${target.constructor.name} applying jsonDecoderCompleted to ${key}`);
     Reflect.defineMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderCompleted, target[key], target);
     return descriptor;
 }
@@ -245,7 +253,7 @@ class JsonDecoder {
         }
         let decodeObject;
         // Create our decoding object using a decoder function if registered
-        const objectFactory = Reflect.getMetadata(decoder_declarations_1.DecoderMetadataKeys.decoder, classType);
+        const objectFactory = Reflect.getMetadata(decoder_declarations_1.DecoderMetadataKeys.decoderFactory, classType);
         if (objectFactory) {
             decodeObject = objectFactory.call(classType, object);
             // Check for invalidation
