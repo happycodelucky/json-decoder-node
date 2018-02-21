@@ -14,7 +14,7 @@ import { marshallerForType } from '../marshallers/marshallers'
 import { URL } from 'url'
 
 // Debug logger
-const debug = console.log//createDebugLog('decoder:json')
+const debug = createDebugLog('decoder:json')
 
 /**
  *

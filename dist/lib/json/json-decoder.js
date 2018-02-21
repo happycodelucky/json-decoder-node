@@ -6,11 +6,12 @@
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
+const createDebugLog = require("debug");
 const decoder_declarations_1 = require("../decoder-declarations");
 const decoder_map_1 = require("../decoder-map");
 const marshallers_1 = require("../marshallers/marshallers");
 // Debug logger
-const debug = console.log; //createDebugLog('decoder:json')
+const debug = createDebugLog('decoder:json');
 /**
  * Reflection metadata keys
  */
