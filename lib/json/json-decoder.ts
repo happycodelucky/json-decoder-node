@@ -345,10 +345,6 @@ export class JsonDecoder {
                 if (alternativeDecodeObject === null) {
                     return null
                 }
-                // // Check for swapped decode object
-                // if (alternativeDecodeObject && alternativeDecodeObject !== decodeObject) {
-                //     decodeObject = alternativeDecodeObject
-                // }
             }
 
             // Look up decoder map for the constructor function
@@ -514,12 +510,6 @@ function evaluatePropertyValue(
 
                 return undefined
             }
-        } else {
-            if (strict) {
-                throw new TypeError(`${elementType.name} is not a JSON decodable type`)
-            }
-
-            return undefined
         }
 
         if (conversionFunction) {
@@ -547,6 +537,12 @@ function evaluatePropertyValue(
                 // Handle basic conversion
                 value = conversionFunction(value, strict)
             }
+        } else {
+            if (strict) {
+                throw new TypeError(`${elementType.name} is not a JSON decodable type`)
+            }
+
+            return undefined
         }
 
         // If there is no value, it should be skipped
