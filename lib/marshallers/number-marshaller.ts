@@ -21,6 +21,15 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
         return Number.NaN
     }
 
+    // Extract 0 index of an array
+    if (Array.isArray(value)) {
+        if (value.length > 0) {
+            return toNumber(value[0], strict)
+        } else {
+            return undefined
+        }
+    }    
+
     if (typeof value === 'number') {
         return value
     }

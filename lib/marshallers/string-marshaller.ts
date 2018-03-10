@@ -22,6 +22,15 @@ export function toString(value: any, strict: boolean = false): string | undefine
         return undefined
     }
 
+    // Extract 0 index of an array
+    if (Array.isArray(value)) {
+        if (value.length > 0) {
+            return toString(value[0], strict)
+        } else {
+            return undefined
+        }
+    }    
+
     if (typeof value === 'string') {
         return value
     }

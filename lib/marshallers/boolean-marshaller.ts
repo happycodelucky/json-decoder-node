@@ -23,6 +23,15 @@ export function toBoolean(value: any, strict: boolean = false): boolean | undefi
         return false
     }
 
+    // Extract 0 index of an array
+    if (Array.isArray(value)) {
+        if (value.length > 0) {
+            value = toBoolean(value[0], strict)
+        } else {
+            return undefined
+        }
+    }
+
     if (typeof value === 'string') {
         if (/^[ \t]*(true|yes|1)[ \t]*$/i.test(value)) {
             return true
