@@ -4,9 +4,9 @@
  * JSON specific types an interfaces
  */
 
-import { ArrayConvertable, ConvertableBasicType, ConvertableBasicConstructionType } from '../decodable-types'
-import { ConvertableCollectionType, ConvertableType } from '../decodable-types'
-export * from '../decodable-types'
+import { ArrayConvertable, ConvertableBasicType, ConvertableBasicConstructionType } from '../decoder/decodable-types'
+import { ConvertableCollectionType, ConvertableType } from '../decoder/decodable-types'
+export * from '../decoder/decodable-types'
 
 /**
  * JSON convertable type

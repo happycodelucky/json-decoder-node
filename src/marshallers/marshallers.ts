@@ -2,7 +2,7 @@
  * @module json-decoder
  */
 
-import { DecoderPrototypalTarget, DecoderPrototypalCollectionTarget } from '../decoder-declarations'
+import { DecoderPrototypalTarget, DecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
 import { toArray } from './array-marshaller'
 import { toBoolean } from './boolean-marshaller'
 import { toMap } from './map-marshaller'

@@ -7,8 +7,9 @@
 import 'reflect-metadata'
 
 import * as createDebugLog from 'debug'
-import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys, isDecoderPrototypalCollectionTarget } from '../decoder-declarations'
-import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder-map'
+import { DecoderConstructableTarget, DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
+import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
+import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder/decoder-map'
 import { JsonConvertable, JsonObject } from './json-decodable-types'
 import { marshallerForType, collectionMarshallerForType } from '../marshallers/marshallers'
 import { URL } from 'url'
