@@ -5,6 +5,7 @@
         "alwaysStrict": true,
         "experimentalDecorators": true,
         "importHelpers": true,
+        "inlineSourceMap": true,
         "target": "es2017",
         "module": "commonjs",
         "outDir": "dist",
