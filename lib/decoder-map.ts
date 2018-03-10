@@ -5,7 +5,7 @@
  */
 
 import 'reflect-metadata'
-import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderMetadataKeys } from './decoder-declarations'
+import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys } from './decoder-declarations'
 
 /**
  * Decoder map alias entry in a decoder configuration map
@@ -18,7 +18,7 @@ export interface DecoderMapAliasEntry {
     /**
      * Type to marshal a property value to
      */
-    type?: Object & DecoderConstructableTarget
+    type?: Object & (DecoderPrototypalTarget | DecoderPrototypalCollectionTarget)
     /**
      * Map function taking the marshaled value (array, object or scalar) and applies another level of mapping
      */
