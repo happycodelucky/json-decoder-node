@@ -15,4 +15,4 @@ function isJSONConvertable(type) {
     return 'fromJSON' in type;
 }
 exports.isJSONConvertable = isJSONConvertable;
-//# sourceMappingURL=json-decodable-types.js.map
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoianNvbi1kZWNvZGFibGUtdHlwZXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9saWIvanNvbi9qc29uLWRlY29kYWJsZS10eXBlcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7Ozs7R0FJRzs7O0FBSUgsNkRBQWtDO0FBeUJsQzs7O0dBR0c7QUFDSCwyQkFBa0MsSUFBUztJQUN2QyxNQUFNLENBQUMsVUFBVSxJQUFJLElBQUksQ0FBQTtBQUM3QixDQUFDO0FBRkQsOENBRUMifQ==
