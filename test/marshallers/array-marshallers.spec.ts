@@ -18,7 +18,7 @@ class ArrayTests {
 
         // Strict mode
 
-        expect(toArray(undefined, true)).to.be.undefined
+        expect(toArray(undefined, undefined, true)).to.be.undefined
     }
 
     @test('null tests')
@@ -27,7 +27,7 @@ class ArrayTests {
 
         // Strict mode
 
-        expect(toArray(null, true)).to.be.deep.equal([null])
+        expect(toArray(null, undefined, true)).to.be.deep.equal([null])
     }
 
     @test('value tests')

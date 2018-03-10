@@ -7,10 +7,10 @@
 import 'reflect-metadata'
 
 import * as createDebugLog from 'debug'
-import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderMetadataKeys } from '../decoder-declarations'
+import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys, isDecoderPrototypalCollectionTarget } from '../decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder-map'
 import { JsonConvertable, JsonObject } from './json-decodable-types'
-import { marshallerForType } from '../marshallers/marshallers'
+import { marshallerForType, collectionMarshallerForType } from '../marshallers/marshallers'
 import { URL } from 'url'
 
 // Debug logger
@@ -143,7 +143,7 @@ export function jsonProperty<T extends DecoderConstructableTarget>(target: T, ke
  */
 export function jsonPropertyAlias(
     keyPath?: string,
-    type?: DecoderPrototypalTarget | Array<DecoderPrototypalTarget>,
+    type?: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget | Array<DecoderPrototypalTarget>,
     mapFunction?: (value: any) => any
 ) {
     if (keyPath !== undefined && typeof keyPath !== 'string') {
@@ -154,14 +154,23 @@ export function jsonPropertyAlias(
     }
 
     return (target: DecoderConstructableTarget, key: string) => {
-        const elementType = Array.isArray(type) ? type[0] : type
-        if (elementType) {
+        const rootType = Array.isArray(type) ? type[0] : type
+        if (rootType) {
+            const elementType = isDecoderPrototypalCollectionTarget(rootType) ? rootType.collection : rootType
             debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}, marshalling using ${elementType.name}`)
         } else {
             debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}`)
         }
         
         const map = decoderMapForTarget(target.constructor)
+
+        // For backwards compatibility
+        if (Array.isArray(type)) {
+            type = {
+                collection: Array,
+                element: type[0]
+            }
+        }
 
         // Assign the property to the map
         if (type !== undefined) {
@@ -186,7 +195,7 @@ export function jsonPropertyAlias(
  * @param {PropertyDescriptor} descriptor
  * @returns
  */
-export function jsonPropertyHandler(keyPath: string, type?: DecoderPrototypalTarget | Array<DecoderPrototypalTarget>) {
+export function jsonPropertyHandler(keyPath: string, type?: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget) {
     if (typeof keyPath !== 'string') {
         throw new TypeError('jsonPropertyHandler(keyPath) should be a non-empty String')
     }
@@ -446,6 +455,46 @@ export class JsonDecoder {
 //
 
 /**
+ * Creates a marshaller for a given type declaration to use for conversion
+ * 
+ * @param type - desired conversion type
+ * @return conversion function or undefined
+ */
+function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget): ((value: any, strict?: boolean) => any) | undefined {
+    if (isDecoderPrototypalCollectionTarget(type)) {
+        let collectionMarshaller
+        if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, type.collection)) {
+            collectionMarshaller = (value: any, strict?: boolean) => {
+                if (typeof value === 'boolean' 
+                    || typeof value === 'number' 
+                    || typeof value === 'string' 
+                    || (typeof value === 'object' && value !== null)) {
+                    return JsonDecoder.decode(value, type.collection)   
+                }
+                if (strict) {
+                    throw new TypeError(`${typeof value} cannot be converted to ${type.collection.name}`)
+                }
+
+                return undefined
+            }
+        } else {
+            collectionMarshaller = collectionMarshallerForType(type.collection)
+        }
+
+        if (!collectionMarshaller) {
+            return undefined;
+        }
+
+        const elementMarshaller = createMarshaller(type.element)
+        return (value: any, strict: boolean) => {
+            return collectionMarshaller(value, elementMarshaller, strict)
+        }
+    }
+
+    return marshallerForType(type)
+}
+
+/**
  * Evaluates a property of an object (being decoded) based on a map entry for the decoder.
  *
  * @param object - object being decoded
@@ -503,52 +552,13 @@ function evaluatePropertyValue(
 
     // Check any type conversion
     if (decoderMapEntry.type) {
-        const elementType = Array.isArray(decoderMapEntry.type) ? decoderMapEntry.type[0] : decoderMapEntry.type
-
-        let conversionFunction = marshallerForType(elementType)
-        if (!conversionFunction && Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, elementType)) {
-            // Element type might be decodable, so decode it
-            conversionFunction = (value: any) => {
-                if (typeof value === 'string' || (typeof value === 'object' && value !== null)) {
-                    return JsonDecoder.decode(value, elementType)
-                }
-
-                if (strict) {
-                    throw new TypeError(`${typeof value} cannot be converted to ${elementType.name}`)
-                }
-
-                return undefined
-            }
-        }
-
-        if (conversionFunction) {
-            if (Array.isArray(decoderMapEntry.type)) {
-                // Handle array conversion
-                const arrayValue = marshallerForType(Array)!(value, strict)
-                if (arrayValue === undefined) {
-                    return undefined
-                } else {
-                    value = arrayValue
-                        .map((itemValue) => conversionFunction!(itemValue, strict))
-                        .filter((itemValue) => itemValue !== undefined)
-                }
-            } else if (Array.isArray(value)) {
-                // Handle reverse array conversion
-                if (value.length === 0) {
-                    return undefined
-                }
-                value = value[0]
-                if (value === undefined) {
-                    return undefined
-                }
-                value = conversionFunction(value, strict)
-            } else {
-                // Handle basic conversion
-                value = conversionFunction(value, strict)
-            }
+        let marshaller = createMarshaller(decoderMapEntry.type)
+        if (marshaller) {
+            value = marshaller(value, strict)
         } else {
             if (strict) {
-                throw new TypeError(`${elementType.name} is not a JSON decodable type`)
+                const rootType = isDecoderPrototypalCollectionTarget(decoderMapEntry.type) ? decoderMapEntry.type.collection : decoderMapEntry.type
+                throw new TypeError(`${rootType.name} is not a JSON decodable type`)
             }
 
             return undefined
