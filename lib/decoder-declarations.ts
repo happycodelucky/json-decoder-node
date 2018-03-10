@@ -52,3 +52,19 @@ export interface DecoderPrototypalTarget {
     name: string
     prototype: Object
 }
+
+/**
+ * Collection target, with potentially nested collection
+ */
+export interface DecoderPrototypalCollectionTarget {
+    collection: DecoderPrototypalTarget
+    element: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget
+}
+
+/**
+ * Type guard for collection targets
+ * @param target 
+ */
+export function isDecoderPrototypalCollectionTarget(target: any): target is DecoderPrototypalCollectionTarget {
+    return 'collection' in target && 'element' in target
+}
