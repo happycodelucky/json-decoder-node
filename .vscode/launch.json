@@ -7,19 +7,21 @@
         {
             "type": "node",
             "request": "launch",
+            "protocol": "inspector",
             "name": "Launch Main.js",
+            "preLaunchTask": "build",
             "program": "${workspaceRoot}/dist/examples/test.js",
             "cwd": "${workspaceRoot}",
             "sourceMaps": true,
             "showAsyncStacks": true,
             "smartStep": false,
-            "protocol": "inspector"
-        },
+        },      
         {
             "type": "node",
             "request": "launch",
             "protocol": "inspector",
             "name": "Mocha Tests",
+            "preLaunchTask": "build",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "runtimeArgs": [
                 "--inspect"
