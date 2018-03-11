@@ -4,8 +4,6 @@
  * Decoder basic types
  */
 
-import { DecoderPrototypalTarget } from './decoder-declarations'
-
 // TODO: Remove
 export interface ConvertableFunction {
     (value: any): any

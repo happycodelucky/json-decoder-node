@@ -3,14 +3,17 @@
  */
 
 import * as chai from 'chai'
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
-import { toURL } from '../../lib/marshallers/url-marshaller'
+import { toURL } from '../../src/marshallers/url-marshaller'
 import { URL } from 'url'
+
+// @ts-ignore
+import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
 
 @suite('Unit: toURL')
+// @ts-ignore
 class URLTests {
 
     @test('undefined tests')

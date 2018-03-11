@@ -3,13 +3,16 @@
  */
 
 import * as chai from 'chai'
+import { toBoolean } from '../../src/marshallers/boolean-marshaller'
+
+// @ts-ignore
 import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
-import { toBoolean } from '../../lib/marshallers/boolean-marshaller'
 
 // Set up chai
 const expect = chai.expect
 
 @suite('Unit: toBoolean')
+// @ts-ignore
 class BooleanTests {
 
     @test('undefined tests')

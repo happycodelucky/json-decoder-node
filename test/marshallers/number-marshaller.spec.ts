@@ -3,13 +3,16 @@
  */
 
 import * as chai from 'chai'
+import { toNumber } from '../../src/marshallers/number-marshaller'
+
+// @ts-ignore
 import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
-import { toNumber } from '../../lib/marshallers/number-marshaller'
 
 // Set up chai
 const expect = chai.expect
 
 @suite('Unit: toNumber')
+// @ts-ignore
 class NumberTests {
 
     @test('undefined tests')

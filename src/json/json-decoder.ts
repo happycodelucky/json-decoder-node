@@ -11,8 +11,7 @@ import { DecoderConstructableTarget, DecoderMetadataKeys, DecoderPrototypalTarge
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder/decoder-map'
 import { JsonConvertable, JsonObject } from './json-decodable-types'
-import { marshallerForType, collectionMarshallerForType } from '../marshallers/marshallers'
-import { URL } from 'url'
+import { marshallerForType, collectionMarshallerForType, CollectionMarshallerFunction, MarshallerFunction } from '../marshallers/marshallers'
 
 // Debug logger
 const debug = createDebugLog('decoder:json')
@@ -385,7 +384,7 @@ export class JsonDecoder {
                 constructor
             )
             if (propertyNotifiers) {
-                for (const [key, handlers] of propertyNotifiers.entries()) {
+                for (const handlers of propertyNotifiers.values()) {
                     for (const handler of handlers) {
                         const value = evaluatePropertyValue(
                             object,
@@ -410,7 +409,7 @@ export class JsonDecoder {
             // Check for a after decode prototype function
             const decoderComplete = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderCompleted, constructor.prototype)
             if (decoderComplete) {
-                const completeObject = decoderComplete.call(decodeObject, object)
+                const completeObject: any = decoderComplete.call(decodeObject, object)
                 // Check for invalidation
                 if (completeObject === null) {
                     return null
@@ -463,9 +462,9 @@ export class JsonDecoder {
  */
 function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget): ((value: any, strict?: boolean) => any) | undefined {
     if (isDecoderPrototypalCollectionTarget(type)) {
-        let collectionMarshaller
+        let collectionMarshaller: CollectionMarshallerFunction | undefined
         if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, type.collection)) {
-            collectionMarshaller = (value: any, strict?: boolean) => {
+            collectionMarshaller = (value: any, itemMarhsaller?: MarshallerFunction, strict?: boolean) => {
                 if (typeof value === 'boolean' 
                     || typeof value === 'number' 
                     || typeof value === 'string' 
@@ -487,8 +486,8 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
         }
 
         const elementMarshaller = createMarshaller(type.element)
-        return (value: any, strict: boolean) => {
-            return collectionMarshaller(value, elementMarshaller, strict)
+        return (value: any, strict?: boolean) => {
+            return collectionMarshaller!(value, elementMarshaller, strict)
         }
     }
 

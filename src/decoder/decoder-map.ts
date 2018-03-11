@@ -5,7 +5,7 @@
  */
 
 import 'reflect-metadata'
-import { DecoderConstructableTarget, DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys } from './decoder-declarations'
+import { DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys } from './decoder-declarations'
 
 /**
  * Decoder map alias entry in a decoder configuration map

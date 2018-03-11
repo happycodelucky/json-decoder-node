@@ -43,6 +43,8 @@ export const DecoderMetadataKeys = {
  */
 export interface DecoderConstructableTarget {
     constructor: Function
+
+    [key: string]: any
 }
 
 /**
@@ -51,6 +53,8 @@ export interface DecoderConstructableTarget {
 export interface DecoderPrototypalTarget {
     name: string
     prototype: Object
+
+    [key: string]: any
 }
 
 /**

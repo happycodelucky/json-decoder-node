@@ -3,13 +3,16 @@
  */
 
 import * as chai from 'chai'
+import { toObject } from '../../src/marshallers/object-marshaller'
+
+// @ts-ignore
 import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
-import { toObject } from '../../lib/marshallers/object-marshaller'
 
 // Set up chai
 const expect = chai.expect
 
 @suite('Unit: toObject')
+// @ts-ignore
 class ObjectTests {
 
     @test('undefined tests')

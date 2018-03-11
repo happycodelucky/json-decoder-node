@@ -1,22 +1,28 @@
 {
     "compilerOptions": {
-        "allowJs": true,
-        "strictNullChecks": true,
         "alwaysStrict": true,
         "experimentalDecorators": true,
         "importHelpers": true,
         "inlineSourceMap": true,
-        "target": "es2017",
+        "inlineSources": true,
         "module": "commonjs",
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
         "outDir": "dist",
-        "sourceMap": true,
+        "pretty": true,
+        "removeComments": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": true,
+        "stripInternal": true,
+        "target": "es2015",
+        "traceResolution": false,
         "watch": true
     },
     "compileOnSave": true,
     "include": [
-        "*.ts",
         "examples/**/*.ts",
-        "lib/**/*.ts",
+        "src/**/*.ts",
         "test/**/*.ts"
     ],
     "exclude":[
