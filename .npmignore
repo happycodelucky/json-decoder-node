@@ -1,0 +1,15 @@
+build
+coverage
+docs
+examples
+src
+test
+wiki
+gulpfile.js
+tsconfig.json
+tslint.json
+.gitignore
+.prettierrc.yaml
+.publishrc
+.travis.yml
+.vscode
