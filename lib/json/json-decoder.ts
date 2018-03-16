@@ -327,7 +327,7 @@ export class JsonDecoder {
             }
         }
         if (!decodeObject) {
-            const options = <JsonDecodableOptions>Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, classType)
+            const options = <JsonDecodableOptions>Reflect.getOwnMetadata(DecoderMetadataKeys.decodableOptions, classType)
             if (options && options.useConstructor) {
                 const constructable = <ObjectConstructor>classType
                 decodeObject = new constructable()
