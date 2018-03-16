@@ -456,7 +456,7 @@ export class JsonDecoder {
 
 /**
  * Creates a marshaller for a given type declaration to use for conversion
- * 
+ *
  * @param type - desired conversion type
  * @return conversion function or undefined
  */
@@ -464,12 +464,12 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
     if (isDecoderPrototypalCollectionTarget(type)) {
         let collectionMarshaller
         if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, type.collection)) {
-            collectionMarshaller = (value: any, strict?: boolean) => {
-                if (typeof value === 'boolean' 
-                    || typeof value === 'number' 
-                    || typeof value === 'string' 
+            collectionMarshaller = (value: any, itemMarshaller: (value: any, strict?: boolean) => any | undefined, strict?: boolean) => {
+                if (typeof value === 'boolean'
+                    || typeof value === 'number'
+                    || typeof value === 'string'
                     || (typeof value === 'object' && value !== null)) {
-                    return JsonDecoder.decode(value, type.collection)   
+                    return JsonDecoder.decode(value, type.collection)
                 }
                 if (strict) {
                     throw new TypeError(`${typeof value} cannot be converted to ${type.collection.name}`)
@@ -491,7 +491,36 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
         }
     }
 
-    return marshallerForType(type)
+    if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, type)) {
+        return (value: any, strict?: boolean) => {
+            if (typeof value === 'boolean'
+                || typeof value === 'number'
+                || typeof value === 'string'
+                || (typeof value === 'object' && value !== null)) {
+                return JsonDecoder.decode(value, type)
+            }
+            if (strict) {
+                throw new TypeError(`${typeof value} cannot be converted to ${type.name}`)
+            }
+
+            return undefined
+        }
+    }
+
+    const marshaller = marshallerForType(type)
+    if (marshaller) {
+        return marshaller
+    }
+
+    // If could be a collection type with no element still
+    const collectionMarshaller = collectionMarshallerForType(type)
+    if (collectionMarshaller) {
+        return (value: any, strict: boolean) => {
+            return collectionMarshaller(value, undefined, strict)
+        }
+    }
+
+    return undefined
 }
 
 /**
