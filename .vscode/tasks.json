@@ -8,7 +8,10 @@
             "type": "typescript",
             "tsconfig": "tsconfig.json",
             "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "option": "watch",
             "presentation": {
                 "echo": true,
                 "reveal": "silent",
