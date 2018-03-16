@@ -17,7 +17,6 @@
         "stripInternal": true,
         "target": "es2015",
         "traceResolution": false,
-        "watch": true
     },
     "compileOnSave": true,
     "include": [
