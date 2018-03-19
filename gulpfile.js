@@ -106,6 +106,23 @@ gulp.task("build", (done) => {
 });
 
 //
+// Install: All
+//
+
+gulp.task("install", (done) => {
+    runSequence(
+        "clean",
+        [
+            "build-lib",
+            "build-dts"
+        ],
+        done
+    );
+});
+
+
+
+//
 // Test
 //
 

@@ -36,7 +36,8 @@
     "reflect-metadata": "^0.1.12"
   },
   "scripts": {
-    "test": "nyc mocha -r ts-node/register -r test/prepare test/**/*.spec.ts --reporter mocha-jenkins-reporter"
+    "test": "nyc mocha -r ts-node/register -r test/prepare test/**/*.spec.ts --reporter mocha-jenkins-reporter",
+    "postinstall": "gulp install"
   },
   "nyc": {
     "extension": [
