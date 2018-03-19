@@ -5,6 +5,7 @@
 import { DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { toArray } from './array-marshaller'
 import { toBoolean } from './boolean-marshaller'
+import { toDate } from './date-marshaller'
 import { toMap } from './map-marshaller'
 import { toNumber } from './number-marshaller'
 import { toObject } from './object-marshaller'
@@ -16,6 +17,7 @@ import { URL } from 'url'
 // Marshaller function map
 const marshallers = new Map<DecoderPrototypalTarget, MarshallerFunction>()
 marshallers.set(Boolean, toBoolean)
+marshallers.set(Date, toDate)
 marshallers.set(Number, toNumber)
 marshallers.set(Object, toObject)
 marshallers.set(String, toString)
