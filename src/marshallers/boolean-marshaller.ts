@@ -15,21 +15,25 @@ export function toBoolean(value: any, strict: boolean = false): boolean | undefi
         return undefined
     }
 
-    if (typeof value === 'boolean') {
-        return value
-    }
-
     if (value === null) {
         return false
     }
 
     // Extract 0 index of an array
     if (Array.isArray(value)) {
+        if (strict) {
+            throw new TypeError(`'${value}' does not represent a Boolean`)
+        }
+
         if (value.length > 0) {
             value = toBoolean(value[0], strict)
         } else {
             return undefined
         }
+    }
+
+    if (typeof value === 'boolean') {
+        return value
     }
 
     if (typeof value === 'string') {
