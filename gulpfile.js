@@ -1,28 +1,18 @@
 "use strict";
 
-//******************************************************************************
-//* DEPENDENCIES
-//******************************************************************************
+const del         = require('del');
+const gulp        = require("gulp");
+const gulpTslint  = require("gulp-tslint");
+const runSequence = require("run-sequence");
+const sourcemaps  = require("gulp-sourcemaps");
+const tsc         = require("gulp-typescript");
+const tslint      = require("tslint");
+const typescript  = require('typescript');
 
-// // Enable ES6
-// require("harmonize")(["harmony", "harmony-proxies", "harmony_proxies"]);
-
-const gulp        = require("gulp"),
-      gulpTslint  = require("gulp-tslint"),
-      tslint      = require("tslint"),
-      tsc         = require("gulp-typescript"),
-      sourcemaps  = require("gulp-sourcemaps"),
-      // uglify      = require("gulp-uglify"),
-      // rename      = require("gulp-rename"),
-      // runSequence = require("run-sequence"),
-      // mocha       = require("gulp-mocha"),
-      // nyc         = require("gulp-nyc"),
-      del         = require('del'),
-      typescript  = require('typescript');
-
-//
-// Correctness tasks
-//
+// Sources
+const SRC_GLOB = 'src/**/**.ts';
+const EXAMPLE_GLOB = 'src/**/**.ts';
+const TEST_GLOB = 'src/**/**.ts';
 
 //
 // Clean
@@ -30,68 +20,104 @@ const gulp        = require("gulp"),
 
 gulp.task("clean", function() {
     return del([
-        "lib",
-        "es",
-        "dts",
-        "build",
-        "coverage"
+        "dev",      // Development
+        "dts",      // Defintion files
+        "lib",      // Javascript sources
+        "build",    // Build artificats
+        "coverage"  // Coverage reports
     ]);
 });
 
-
-// //
-// // Build tasks
-// //
-
-// const config = require('./tsconfig.json')
-// const vscodeTypeScriptProject = tsc.createProject("tsconfig.json", { 
-//   typescript
-// });
-
-// gulp.task("build-vscode", function() {
-//     return gulp
-//         .watch(config.include, 
-//             vscodeTypeScriptProject
-//                 .src()
-//                 .pipe(vscodeTypeScriptProject())
-//                 .js.pipe(gulp.dest("lib")));
-// });
-
 //
-// CommonJS (aka Node)
+// Lint
 //
 
-const tsCommonJsProject = tsc.createProject("tsconfig.json", {
-    module : "commonjs", 
-    typescript: require("typescript") 
+gulp.task("lint", function() {
+    const program = tslint.Linter.createProgram("./tsconfig.json");
+
+    return gulp.src([
+            SRC_GLOB,
+            EXAMPLE_GLOB,
+            TEST_GLOB,
+        ])
+        .pipe(gulpTslint({
+            formatter: "stylish",
+            program,
+        }))
+        .pipe(gulpTslint.report());
 });
+
+//
+// Build: Universal Module Definition (ES Module, CommonJS, AMD)
+//
 
 gulp.task("build-lib", function() {
-    return tsCommonJsProject
-    .src()
-    .pipe(tsCommonJsProject())
-    .on("error", function (err) {
-        process.exit(1);
-    })
-    .js.pipe(gulp.dest("lib"));
+    const project = tsc.createProject("tsconfig.json", {
+        module : "umd",
+        target: 'es2016',
+        typescript: require("typescript")
+    });
+
+    return gulp.src([
+            SRC_GLOB
+        ])
+        .pipe(project())
+        .on("error", function (err) {
+            //process.exit(1);
+        })
+        .js.pipe(gulp.dest("lib"));
 });
 
 //
-// Typescript DTS declaration file generation
+// Build: Typescript DTS declaration file generation
 //
-const tsDtsProject = tsc.createProject("tsconfig.json", {
-  declaration: true,
-  noResolve: false,
-  typescript: require("typescript") 
-});
 
 gulp.task("build-dts", function() {
+    const project = tsc.createProject("tsconfig.json", {
+        declaration: true,
+        noResolve: false,
+        typescript: require("typescript")
+    });
+
     return gulp.src([
-        "src/**/*.ts"
-    ])
-    .pipe(tsDtsProject())
-    .on("error", function (err) {
-        process.exit(1);
-    })
-    .dts.pipe(gulp.dest("dts"));
+            SRC_GLOB
+        ])
+        .pipe(project())
+        .on("error", function (err) {
+            process.exit(1);
+        })
+        .dts.pipe(gulp.dest("dts"));
+});
+
+//
+// Build: All
+//
+
+gulp.task("build", (done) => {
+    runSequence(
+        // "lint",
+        [
+            "build-lib",
+            "build-dts"
+        ],
+        // "build-test",
+        done
+    );
+});
+
+//
+// Test
+//
+
+//
+// Default
+//
+
+gulp.task("default", (done) => {
+    runSequence(
+        "clean",
+        "build",
+        //"test",
+        done,
+    );
 });
