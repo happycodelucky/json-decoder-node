@@ -14,12 +14,6 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
     if (value === undefined) {
         return undefined
     }
-    if (value === null) {
-        if (strict) {
-            throw new TypeError(`'null' cannot be converted to a Number`)
-        }
-        return Number.NaN
-    }
 
     // Extract 0 index of an array
     if (Array.isArray(value)) {
@@ -28,7 +22,7 @@ export function toNumber(value: any, strict: boolean = false): number | undefine
         } else {
             return undefined
         }
-    }    
+    }
 
     if (typeof value === 'number') {
         return value

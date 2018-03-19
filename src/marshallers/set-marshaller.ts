@@ -15,6 +15,7 @@ export function toSet(value: any, itemMarshaller?: (value: any, strict?: boolean
     if (value === undefined ) {
         return undefined
     }
+
     if (value === null) {
         if (strict) {
             throw new TypeError(`'null' cannot be converted to a Set`)
@@ -28,9 +29,9 @@ export function toSet(value: any, itemMarshaller?: (value: any, strict?: boolean
         }
         return new Set(value)
     }
-    
+
     const set = new Set()
     set.add(itemMarshaller ? itemMarshaller(value, strict) : value)
-    
+
     return set
 }

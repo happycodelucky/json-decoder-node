@@ -26,19 +26,16 @@ export function toURL(value: any, strict: boolean = false): URL | undefined {
         }
     }
 
-    if (typeof value !== 'string') {
-        if (strict) {
-            throw new TypeError(`${typeof value} cannot be converted to a URL`)
-        }
-        return undefined
+    if (typeof value === 'string') {
+        try {
+            return new URL(value)
+        } catch { }
     }
 
-    try {
-        return new URL(value)
-    } catch {
-        if (strict) {
-            throw new TypeError(`'${value}' is not a valid URL`)
-        }
-        return undefined
+    if (strict) {
+        throw new TypeError(`${typeof value} cannot be converted to a URL`)
     }
+    return undefined
+
+
 }
