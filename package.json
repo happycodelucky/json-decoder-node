@@ -1,12 +1,11 @@
 {
   "name": "json-decoder",
-  "version": "0.3.1",
-  "main": "dist/src/index.js",
+  "version": "0.4.0",
+  "main": "dist/lib/index.js",
   "types": "dts/index.d.ts",
   "license": "MIT",
   "dependencies": {
     "debug": "^3.1.0",
-    "reflect-metadata": "^0.1.12",
     "tslib": "^1.9.0"
   },
   "devDependencies": {
@@ -28,11 +27,13 @@
     "mocha-typescript": "^1.1.12",
     "nyc": "^11.4.1",
     "redis-mock": "^0.21.0",
+    "run-sequence": "^2.2.1",
     "source-map-support": "^0.5.3",
     "ts-node": "^5.0.0",
-    "tsc-watch": "^1.0.16",
     "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "typescript": "^2.7.2",
+    "harmonize": "^2.0.0",
+    "reflect-metadata": "^0.1.12"
   },
   "scripts": {
     "test": "nyc mocha -r ts-node/register -r test/prepare test/**/*.spec.ts --reporter mocha-jenkins-reporter"
