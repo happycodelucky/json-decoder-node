@@ -11,8 +11,8 @@ const typescript  = require('typescript');
 
 // Sources
 const SRC_GLOB = 'src/**/**.ts';
-const EXAMPLE_GLOB = 'src/**/**.ts';
-const TEST_GLOB = 'src/**/**.ts';
+const EXAMPLES_GLOB = 'examples/**/**.ts';
+const TEST_GLOB = 'test/**/**.ts';
 
 //
 // Clean
@@ -37,7 +37,7 @@ gulp.task("lint", function() {
 
     return gulp.src([
             SRC_GLOB,
-            EXAMPLE_GLOB,
+            EXAMPLES_GLOB,
             TEST_GLOB,
         ])
         .pipe(gulpTslint({
