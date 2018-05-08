@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to a Set, if possible.
  *
  * @param value - value to convert to a Set
@@ -12,14 +8,15 @@
  * @returns a set, of the value, or the value itself.
  */
 export function toSet(value: any, itemMarshaller?: (value: any, strict?: boolean) => any, strict?: boolean): Set<any> | undefined {
-    if (value === undefined ) {
+    if (value === undefined) {
         return undefined
     }
 
     if (value === null) {
         if (strict) {
-            throw new TypeError(`'null' cannot be converted to a Set`)
+            throw new TypeError('\'null\' cannot be converted to a Set')
         }
+
         return undefined
     }
 
@@ -27,6 +24,7 @@ export function toSet(value: any, itemMarshaller?: (value: any, strict?: boolean
         if (itemMarshaller) {
             value = value.map(item => itemMarshaller(item, strict))
         }
+
         return new Set(value)
     }
 

@@ -1,6 +1,4 @@
 /**
- * @module json-decoder
- *
  * Decoder basic types
  */
 
@@ -10,7 +8,7 @@ export interface ConvertableFunction {
 }
 
 /** */
-export type ConvertableBasicType = Boolean | Number | String | Object
+export type ConvertableBasicType = boolean | number | string | object
 export type ConvertableBasicConstructionType =
     | typeof Boolean
     | typeof Number

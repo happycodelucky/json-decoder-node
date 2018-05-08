@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to a Object, if possible
  *
  * @param value - value to convert to an Object

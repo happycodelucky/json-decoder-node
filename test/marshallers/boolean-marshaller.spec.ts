@@ -1,12 +1,8 @@
-/**
- * @module json-decoder
- */
-
 import * as chai from 'chai'
 import { toBoolean } from '../../src/marshallers/boolean-marshaller'
 
 // @ts-ignore
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
@@ -52,15 +48,13 @@ class BooleanTests {
 
         expect(toBoolean(1234)).to.be.true
         expect(toBoolean(0.1234)).to.be.true
-        expect(toBoolean(0.0)).to.be.false
-        expect(toBoolean(1.0)).to.be.true
+        expect(toBoolean(0)).to.be.false
+        expect(toBoolean(1)).to.be.true
 
         // Strict mode
 
         expect(toBoolean(1, true)).to.be.true
         expect(toBoolean(0, true)).to.be.false
-        expect(toBoolean(0.0, true)).to.be.false
-        expect(toBoolean(1.0, true)).to.be.true
 
         expect(() => toBoolean(-1, true)).to.throw(TypeError)
         expect(() => toBoolean(2, true)).to.throw(TypeError)

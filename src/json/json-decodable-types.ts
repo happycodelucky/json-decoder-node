@@ -5,7 +5,7 @@
  */
 
 export * from '../decoder/decodable-types'
-import { ArrayConvertable, ConvertableBasicType, ConvertableBasicConstructionType } from '../decoder/decodable-types'
+import { ArrayConvertable, ConvertableBasicConstructionType, ConvertableBasicType } from '../decoder/decodable-types'
 
 /**
  * JSON convertable type
@@ -15,7 +15,7 @@ export interface JsonConvertable<T = any> {
      * Converts an object from JSON
      * @param json - JSON object
      */
-    fromJSON(json: Object): T | null | undefined
+    fromJSON(json: {}): T | null | undefined
 }
 
 /**
@@ -27,7 +27,7 @@ export interface JsonConvertableFunction<T = any> {
      * @param json - JSON object
      * @return Converted object or null/undefined
      */
-    (json: Object): T | null | undefined
+    (json: JsonObject): T | null | undefined
 }
 
 /**
@@ -61,6 +61,6 @@ export type JsonDecodableType = ConvertableBasicConstructionType | JsonConvertab
 /**
  * Generic JSON object
  */
-export interface JsonObject {
-    readonly [key: string]: any | undefined
+export interface JsonObject extends Record<string, any> {
+
 }

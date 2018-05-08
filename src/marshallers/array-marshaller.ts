@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to an Array, if possible.
  *
  * @param value - value to convert to a Boolean
@@ -17,15 +13,17 @@ export function toArray(value: any, itemMarshaller?: (value: any, strict?: boole
     }
     if (value === null) {
         if (strict) {
-            throw new TypeError(`'null' cannot be converted to an Array`)
+            throw new TypeError('\'null\' cannot be converted to an Array')
         }
+
         return undefined
-    }     
+    }
 
     if (Array.isArray(value)) {
         if (itemMarshaller) {
             return value.map(item => itemMarshaller(item, strict))
         }
+
         return value
     }
 

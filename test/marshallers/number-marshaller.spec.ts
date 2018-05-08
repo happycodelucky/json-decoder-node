@@ -1,15 +1,11 @@
-/**
- * @module json-decoder
- */
-
 import * as chai from 'chai'
 import { toNumber } from '../../src/marshallers/number-marshaller'
 
 // @ts-ignore
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
-const expect = chai.expect
+// const expect = chai.expect
 chai.should()
 
 @suite('Unit: toNumber')
@@ -257,16 +253,16 @@ class NumberTests {
 
     @test('string base10 float value tests')
     testBase10FloatValues() {
-        toNumber('1,234,567,890.')!.should.be.equal(1234567890.0)
-        toNumber('0.')!.should.be.equal(0.0)
-        toNumber('.0')!.should.be.equal(0.0)
-        toNumber('0.0')!.should.be.equal(0.0)
+        toNumber('1,234,567,890.')!.should.be.equal(1234567890)
+        toNumber('0.')!.should.be.equal(0)
+        toNumber('.0')!.should.be.equal(0)
+        toNumber('0.0')!.should.be.equal(0)
         toNumber('1.2')!.should.be.equal(1.2)
         toNumber('+1.2')!.should.be.equal(1.2)
         toNumber('-1.2')!.should.be.equal(-1.2)
-        toNumber('1234567890.1234567890')!.should.be.equal(1234567890.1234567890)
-        toNumber('+1234567890.1234567890')!.should.be.equal(+1234567890.1234567890)
-        toNumber('-1234567890.1234567890')!.should.be.equal(-1234567890.1234567890)
+        toNumber('1234567890.1234567890')!.should.be.equal(1234567890.123456789)
+        toNumber('+1234567890.1234567890')!.should.be.equal(+1234567890.123456789)
+        toNumber('-1234567890.1234567890')!.should.be.equal(-1234567890.123456789)
         toNumber('1.2.3')!.should.be.NaN
         toNumber('+1.2.3')!.should.be.NaN
         toNumber('-1.2.3')!.should.be.NaN
@@ -282,88 +278,88 @@ class NumberTests {
         toNumber('0.2.3')!.should.be.NaN
         toNumber('+0.2.3')!.should.be.NaN
         toNumber('-0.2.3')!.should.be.NaN
-        toNumber('1.')!.should.be.equal(1.0)
-        toNumber('+1.')!.should.be.equal(1.0)
-        toNumber('-1.')!.should.be.equal(-1.0)
+        toNumber('1.')!.should.be.equal(1)
+        toNumber('+1.')!.should.be.equal(1)
+        toNumber('-1.')!.should.be.equal(-1)
         toNumber('1.2.')!.should.be.NaN
         toNumber('+1.2.')!.should.be.NaN
         toNumber('-1.2.')!.should.be.NaN
-        toNumber('.1234567890')!.should.be.equal(0.1234567890)
-        toNumber('+.1234567890')!.should.be.equal(0.1234567890)
-        toNumber('-.1234567890')!.should.be.equal(-0.1234567890)
-        toNumber('0.1234567890')!.should.be.equal(0.1234567890)
-        toNumber('0.1234567890')!.should.be.equal(0.1234567890)
-        toNumber('-0.1234567890')!.should.be.equal(-0.1234567890)
-        toNumber('1.E0')!.should.be.equal(1.0)
-        toNumber('1.E+0')!.should.be.equal(1.0E0)
-        toNumber('1.E-0')!.should.be.equal(1.0E0)
-        toNumber('1.E1')!.should.be.equal(1.0E1)
-        toNumber('1.E+1')!.should.be.equal(1.0E1)
-        toNumber('1.E-1')!.should.be.equal(1.0E-1)
+        toNumber('.1234567890')!.should.be.equal(0.123456789)
+        toNumber('+.1234567890')!.should.be.equal(0.123456789)
+        toNumber('-.1234567890')!.should.be.equal(-0.123456789)
+        toNumber('0.1234567890')!.should.be.equal(0.123456789)
+        toNumber('0.1234567890')!.should.be.equal(0.123456789)
+        toNumber('-0.1234567890')!.should.be.equal(-0.123456789)
+        toNumber('1.E0')!.should.be.equal(1)
+        toNumber('1.E+0')!.should.be.equal(1)
+        toNumber('1.E-0')!.should.be.equal(1)
+        toNumber('1.E1')!.should.be.equal(1E1)
+        toNumber('1.E+1')!.should.be.equal(1E1)
+        toNumber('1.E-1')!.should.be.equal(1E-1)
         toNumber('.E0')!.should.be.NaN
         toNumber('.E+0')!.should.be.NaN
         toNumber('.E-0')!.should.be.NaN
         toNumber('.E1')!.should.be.NaN
         toNumber('.E+1')!.should.be.NaN
         toNumber('.E-1')!.should.be.NaN
-        toNumber('1.1234567890E0')!.should.be.equal(1.1234567890)
-        toNumber('+1.1234567890E0')!.should.be.equal(1.1234567890)
-        toNumber('-1.1234567890E0')!.should.be.equal(-1.1234567890)
-        toNumber('1.1234567890E1')!.should.be.equal(1.1234567890E1)
-        toNumber('+1.1234567890E1')!.should.be.equal(1.1234567890E1)
-        toNumber('-1.1234567890E1')!.should.be.equal(-1.1234567890E1)
-        toNumber('1234567890.1234567890E1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('1234567890.1234567890E1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('-1234567890.1234567890E1234567890')!.should.be.equal(-1234567890.1234567890E1234567890)
+        toNumber('1.1234567890E0')!.should.be.equal(1.123456789)
+        toNumber('+1.1234567890E0')!.should.be.equal(1.12345678)
+        toNumber('-1.1234567890E0')!.should.be.equal(-1.123456789)
+        toNumber('1.1234567890E1')!.should.be.equal(1.123456789E1)
+        toNumber('+1.1234567890E1')!.should.be.equal(1.123456789E1)
+        toNumber('-1.1234567890E1')!.should.be.equal(-1.123456789E1)
+        toNumber('1234567890.1234567890E1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('1234567890.1234567890E1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('-1234567890.1234567890E1234567890')!.should.be.equal(-1234567890.123456789E1234567890)
         toNumber('1.1234567890E0.1')!.should.be.NaN
         toNumber('+1.1234567890E0.1')!.should.be.NaN
         toNumber('-1.1234567890E0.1')!.should.be.NaN
         toNumber('1.1234567890E1.1')!.should.be.NaN
         toNumber('+1.1234567890E1.1')!.should.be.NaN
         toNumber('-1.1234567890E1.1')!.should.be.NaN
-        toNumber('1.1234567890E+0')!.should.be.equal(1.1234567890)
-        toNumber('+1.1234567890E+0')!.should.be.equal(1.1234567890)
-        toNumber('-1.1234567890E+0')!.should.be.equal(-1.1234567890)
-        toNumber('1.1234567890E+1')!.should.be.equal(1.1234567890E1)
-        toNumber('+1.1234567890E+1')!.should.be.equal(1.1234567890E1)
-        toNumber('-1.1234567890E+1')!.should.be.equal(-1.1234567890E1)
-        toNumber('1234567890.1234567890E+1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('+1234567890.1234567890E+1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('-1234567890.1234567890E+1234567890')!.should.be.equal(-11234567890.1234567890E1234567890)
+        toNumber('1.1234567890E+0')!.should.be.equal(1.123456789)
+        toNumber('+1.1234567890E+0')!.should.be.equal(1.123456789)
+        toNumber('-1.1234567890E+0')!.should.be.equal(-1.123456789)
+        toNumber('1.1234567890E+1')!.should.be.equal(1.123456789E1)
+        toNumber('+1.1234567890E+1')!.should.be.equal(1.123456789E1)
+        toNumber('-1.1234567890E+1')!.should.be.equal(-1.123456789E1)
+        toNumber('1234567890.1234567890E+1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('+1234567890.1234567890E+1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('-1234567890.1234567890E+1234567890')!.should.be.equal(-11234567890.123456789E1234567890)
         toNumber('1.1234567890E+1.1')!.should.be.NaN
         toNumber('+1.1234567890E+1.1')!.should.be.NaN
         toNumber('-1.1234567890E+1.1')!.should.be.NaN
-        toNumber('1.1234567890E-0')!.should.be.equal(1.1234567890)
-        toNumber('+1.1234567890E-0')!.should.be.equal(1.1234567890)
-        toNumber('-1.1234567890E-0')!.should.be.equal(-1.1234567890)
-        toNumber('1.1234567890E-1')!.should.be.equal(1.1234567890E-1)
-        toNumber('+1.1234567890E-1')!.should.be.equal(1.1234567890E-1)
-        toNumber('-1.1234567890E-1')!.should.be.equal(-1.1234567890E-1)
-        toNumber('1234567890.1234567890E-1234567890')!.should.be.equal(1234567890.1234567890E-1234567890)
-        toNumber('+1234567890.1234567890E-1234567890')!.should.be.equal(1234567890.1234567890E-1234567890)
-        toNumber('-1234567890.1234567890E-1234567890')!.should.be.equal(-11234567890.1234567890E-1234567890)
-        toNumber('1234567890.1234567890e1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('+1234567890.1234567890e1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('-1234567890.1234567890e1234567890')!.should.be.equal(-11234567890.1234567890E1234567890)
-        toNumber('1234567890.1234567890e+1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('+1234567890.1234567890e+1234567890')!.should.be.equal(1234567890.1234567890E1234567890)
-        toNumber('-1234567890.1234567890e+1234567890')!.should.be.equal(-11234567890.1234567890E1234567890)
-        toNumber('1234567890.1234567890e-1234567890')!.should.be.equal(1234567890.1234567890E-1234567890)
-        toNumber('+1234567890.1234567890e-1234567890')!.should.be.equal(1234567890.1234567890E-1234567890)
-        toNumber('-1234567890.1234567890e-1234567890')!.should.be.equal(-11234567890.1234567890E-1234567890)
+        toNumber('1.1234567890E-0')!.should.be.equal(1.123456789)
+        toNumber('+1.1234567890E-0')!.should.be.equal(1.123456789)
+        toNumber('-1.1234567890E-0')!.should.be.equal(-1.123456789)
+        toNumber('1.1234567890E-1')!.should.be.equal(1.123456789E-1)
+        toNumber('+1.1234567890E-1')!.should.be.equal(1.123456789E-1)
+        toNumber('-1.1234567890E-1')!.should.be.equal(-1.123456789E-1)
+        toNumber('1234567890.1234567890E-1234567890')!.should.be.equal(1234567890.123456789E-1234567890)
+        toNumber('+1234567890.1234567890E-1234567890')!.should.be.equal(1234567890.123456789E-1234567890)
+        toNumber('-1234567890.1234567890E-1234567890')!.should.be.equal(-11234567890.123456789E-1234567890)
+        toNumber('1234567890.1234567890e1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('+1234567890.1234567890e1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('-1234567890.1234567890e1234567890')!.should.be.equal(-11234567890.123456789E1234567890)
+        toNumber('1234567890.1234567890e+1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('+1234567890.1234567890e+1234567890')!.should.be.equal(1234567890.123456789E1234567890)
+        toNumber('-1234567890.1234567890e+1234567890')!.should.be.equal(-11234567890.123456789E1234567890)
+        toNumber('1234567890.1234567890e-1234567890')!.should.be.equal(1234567890.123456789E-1234567890)
+        toNumber('+1234567890.1234567890e-1234567890')!.should.be.equal(1234567890.123456789E-1234567890)
+        toNumber('-1234567890.1234567890e-1234567890')!.should.be.equal(-11234567890.123456789E-1234567890)
 
-        toNumber('1,234,567,890.')!.should.be.equal(1234567890.0)
-        toNumber('+1,234,567,890.')!.should.be.equal(1234567890.0)
-        toNumber('-1,234,567,890.')!.should.be.equal(-1234567890.0)
+        toNumber('1,234,567,890.')!.should.be.equal(1234567890)
+        toNumber('+1,234,567,890.')!.should.be.equal(1234567890)
+        toNumber('-1,234,567,890.')!.should.be.equal(-1234567890)
         toNumber('1,234,567,890.1')!.should.be.equal(1234567890.1)
         toNumber('+1,234,567,890.1')!.should.be.equal(1234567890.1)
         toNumber('-1,234,567,890.1')!.should.be.equal(-1234567890.1)
-        toNumber('1,234,567,890.1234567890E1')!.should.be.equal(1234567890.1234567890E1)
-        toNumber('+1,234,567,890.1234567890E+1')!.should.be.equal(1234567890.1234567890E1)
-        toNumber('-1,234,567,890.1234567890E-1')!.should.be.equal(-1234567890.1234567890E-1)
-        toNumber('1,234,567,890.1234567890e1')!.should.be.equal(1234567890.1234567890E1)
-        toNumber('+1,234,567,890.1234567890e+1')!.should.be.equal(1234567890.1234567890E1)
-        toNumber('-1,234,567,890.1234567890e-1')!.should.be.equal(-1234567890.1234567890E-1)
+        toNumber('1,234,567,890.1234567890E1')!.should.be.equal(1234567890.123456789E1)
+        toNumber('+1,234,567,890.1234567890E+1')!.should.be.equal(1234567890.123456789E1)
+        toNumber('-1,234,567,890.1234567890E-1')!.should.be.equal(-1234567890.123456789E-1)
+        toNumber('1,234,567,890.1234567890e1')!.should.be.equal(1234567890.123456789E1)
+        toNumber('+1,234,567,890.1234567890e+1')!.should.be.equal(1234567890.123456789E1)
+        toNumber('-1,234,567,890.1234567890e-1')!.should.be.equal(-1234567890.123456789E-1)
 
         toNumber('1.1,234')!.should.be.NaN
         toNumber('+1.1,234')!.should.be.NaN

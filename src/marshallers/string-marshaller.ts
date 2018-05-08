@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to a String, if possible
  *
  * @param value - a value to convert to a string
@@ -17,8 +13,9 @@ export function toString(value: any, strict: boolean = false): string | undefine
 
     if (value === null) {
         if (strict) {
-            throw new TypeError(`'null' cannot be converted to a String`)
+            throw new TypeError('\'null\' cannot be converted to a String')
         }
+
         return undefined
     }
 
@@ -29,7 +26,7 @@ export function toString(value: any, strict: boolean = false): string | undefine
         } else {
             return undefined
         }
-    }    
+    }
 
     if (typeof value === 'string') {
         return value

@@ -1,6 +1,8 @@
 /**
- * @module json-decoder
+ * Registery of types to associated marshallers
  */
+
+import { URL } from 'url'
 
 import { DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { toArray } from './array-marshaller'
@@ -12,7 +14,6 @@ import { toObject } from './object-marshaller'
 import { toSet } from './set-marshaller'
 import { toString } from './string-marshaller'
 import { toURL } from './url-marshaller'
-import { URL } from 'url'
 
 // Marshaller function map
 const marshallers = new Map<DecoderPrototypalTarget, MarshallerFunction>()

@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to a Date, if possible.
  *
  * @param value - a value to convert to an URL
@@ -30,8 +26,10 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
             if (strict) {
                 throw new TypeError(`'${value}' is not a valid URL`)
             }
+
             return undefined
         }
+
         return new Date(timestamp)
     }
 
@@ -40,13 +38,16 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
             if (strict) {
                 throw new TypeError(`'${value}' is not a valid URL`)
             }
+
             return undefined
         }
+
         return new Date(value)
     }
 
     if (strict) {
         throw new TypeError(`'${value}' is not a valid URL`)
     }
+
     return undefined
 }

@@ -1,8 +1,4 @@
 /**
- * @module json-decoder
- */
-
-/**
  * Converts a JSON value to a Boolean, if possible.
  *
  * @param value - value to convert to a Boolean
@@ -67,5 +63,6 @@ export function toBoolean(value: any, strict: boolean = false): boolean | undefi
     if (strict) {
         throw new TypeError(`'${typeof value}' cannot be converted to a Boolean`)
     }
+
     return undefined
 }

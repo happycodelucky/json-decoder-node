@@ -1,12 +1,8 @@
-/**
- * @module json-decoder
- */
-
 import * as chai from 'chai'
 import { toString } from '../../src/marshallers/string-marshaller'
 
 // @ts-ignore
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
@@ -36,7 +32,7 @@ class StringTests {
     @test('array value tests')
     testArrayValues() {
         const object1 = {
-            foo: 'bar'
+            foo: 'bar',
         }
         expect(toString([1, '2', object1])).to.equal('1,2,[object Object]')
         expect(toString([])).to.be.equal('')
@@ -59,10 +55,9 @@ class StringTests {
     }
 
     @test('number value tests')
-    testNumberValues() {    
+    testNumberValues() {
         expect(toString(-123)).to.be.equal('-123')
         expect(toString(0)).to.be.equal('0')
-        expect(toString(0.0)).to.be.equal('0')
         expect(toString(123)).to.be.equal('123')
         expect(toString(123.456)).to.be.equal('123.456')
 
@@ -70,7 +65,6 @@ class StringTests {
 
         expect(toString(-123, true)).to.be.equal('-123')
         expect(toString(0, true)).to.be.equal('0')
-        expect(toString(0.0, true)).to.be.equal('0')
         expect(toString(123, true)).to.be.equal('123')
         expect(toString(123.456, true)).to.be.equal('123.456')
     }
@@ -79,7 +73,7 @@ class StringTests {
     testStringValues() {
         expect(toString('')).to.be.equal('')
         expect(toString('foo')).to.be.equal('foo')
-        
+
         // Strict mode
         expect(toString('', true)).to.be.equal('')
         expect(toString('foo', true)).to.be.equal('foo')
@@ -88,7 +82,7 @@ class StringTests {
     @test('object value tests')
     testObjectValues() {
         const object1 = {
-            foo: 'bar'
+            foo: 'bar',
         }
         expect(toString(object1)).to.be.equal('[object Object]')
         const object2 = new Set([1, 1, 4])
@@ -97,6 +91,6 @@ class StringTests {
         // Strict mode
 
         expect(toString(object1, true)).to.be.equal('[object Object]')
-        expect(toString(object2, true)).to.be.equal('[object Set]')   
-    }    
+        expect(toString(object2, true)).to.be.equal('[object Set]')
+    }
 }

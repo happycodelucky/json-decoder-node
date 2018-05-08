@@ -1,6 +1,4 @@
 /**
- * @module json-decoder
- *
  * Declarations for the JSON decoder as used internally by the
  */
 
@@ -35,7 +33,7 @@ export const DecoderMetadataKeys = {
     /**
      * Custom decoder completion function on class prototype
      */
-    decoderCompleted: Symbol.for('decoder.decoderCompleted')
+    decoderCompleted: Symbol.for('decoder.decoderCompleted'),
 }
 
 /**
@@ -52,7 +50,7 @@ export interface DecoderConstructableTarget {
  */
 export interface DecoderPrototypalTarget {
     name: string
-    prototype: Object
+    prototype: object
 
     [key: string]: any
 }
@@ -67,7 +65,8 @@ export interface DecoderPrototypalCollectionTarget {
 
 /**
  * Type guard for collection targets
- * @param target 
+ * @param target - target to test
+ * @returns true if the target is a DecoderPrototypalCollectionTarget
  */
 export function isDecoderPrototypalCollectionTarget(target: any): target is DecoderPrototypalCollectionTarget {
     return 'collection' in target && 'element' in target

@@ -1,7 +1,3 @@
-/**
- * @module json-decoder
- */
-
 import { URL } from 'url'
 
 /**
@@ -35,7 +31,6 @@ export function toURL(value: any, strict: boolean = false): URL | undefined {
     if (strict) {
         throw new TypeError(`${typeof value} cannot be converted to a URL`)
     }
+
     return undefined
-
-
 }

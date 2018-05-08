@@ -1,12 +1,8 @@
-/**
- * @module json-decoder
- */
-
 import * as chai from 'chai'
 import { toArray } from '../../src/marshallers/array-marshaller'
 
 // @ts-ignore
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
@@ -49,12 +45,12 @@ class ArrayTests {
         const value2 = {
             name: 'foo',
             other: {
-                bar: 1
-            }
+                bar: 1,
+            },
         }
         expect(toArray(value2)).to.be.deep.equal([value2])
-    } 
-    
+    }
+
     @test('array value tests')
     testArrayValues() {
         const value1: any[] = []
@@ -78,9 +74,9 @@ class ArrayTests {
         const value7: any[] = [{
             name: 'foo',
             other: {
-                bar: 1
-            }
+                bar: 1,
+            },
         }]
         expect(toArray(value7)).to.be.equal(value7)
-    } 
+    }
 }
