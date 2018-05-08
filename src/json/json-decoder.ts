@@ -1,291 +1,24 @@
 /**
- * @module json-decoder
- *
  * JSON specific decoder and decorators
  */
 
 import 'reflect-metadata'
 
-import * as createDebugLog from 'debug'
-import { DecoderConstructableTarget, DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
+import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
-import { DecoderMapEntry, decoderMapForTarget, DecoderMapAliasEntry } from '../decoder/decoder-map'
-import { JsonConvertable, JsonObject } from './json-decodable-types'
-import { marshallerForType, collectionMarshallerForType, CollectionMarshallerFunction, MarshallerFunction } from '../marshallers/marshallers'
+import { DecoderMapEntry, decoderMapForTarget } from '../decoder/decoder-map'
 
-// Debug logger
-const debug = createDebugLog('decoder:json')
+import { CollectionMarshallerFunction, MarshallerFunction } from '../marshallers/marshallers'
+import { collectionMarshallerForType, marshallerForType } from '../marshallers/marshallers'
 
-/**
- *
- */
-export interface JsonDecodableOptions {
-    /**
-     * JSON Schema defintion
-     */
-    schema?: object
-
-    /**
-     * Strict mode
-     */
-    strict?: boolean
-
-    /**
-     * When true will call the constructor function
-     */
-    useConstructor?: boolean
-}
-
-/**
- * Reflection metadata keys
- */
-export const JsonDecoderMetadataKeys = {
-    /**
-     * Metadata for the JSON schema
-     */
-    schema: Symbol.for('jsonDecoder.schema'),
-
-    /**
-     * JSON context object
-     */
-    context: Symbol.for('jsonDecoder.context')
-}
-
-/**
- * Declare a class as being decodable
- * @param options
- */
-export function jsonDecodable(options?: JsonDecodableOptions) {
-    return <T extends DecoderPrototypalTarget>(target: T): T & JsonConvertable => {
-        debug(`${target.name} applying jsonDecodable with options ${JSON.stringify(options)}`)
-        Reflect.defineMetadata(DecoderMetadataKeys.decodable, true, target)
-
-        // Decodable options
-        const decodableOptions = Object.assign({}, options)
-        delete decodableOptions.schema
-        Reflect.defineMetadata(DecoderMetadataKeys.decodableOptions, decodableOptions, target)
-
-        // JSON schema
-        if (options && options.schema) {
-            Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, options.schema, target)
-        }
-
-        // const map = decoderMapForTarget(target);
-        // TODO: Output the decoder map for the target. Needs to be sanitize to output correctly
-
-        return <T & JsonConvertable>target
-    }
-}
-
-/**
- *
- * @param options
- */
-export function jsonSchema<T extends DecoderPrototypalTarget>(target: T): T {
-    debug(`${target.name} applying jsonSchema`)
-    Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, true, target)
-
-    return target
-}
-
-/**
- * JSON context object assigned to decoding object
- * Also addes `toJSON()` to return the decoded object back
- */
-export function jsonContext<T extends DecoderConstructableTarget>(target: T, key: string) {
-    debug(`${target.constructor.name} applying jsonContext to ${key}`)
-    Reflect.defineMetadata(JsonDecoderMetadataKeys.context, key, target.constructor)
-
-    // Defined toJSON if not already defined
-    if (!('toJSON' in target)) {
-        target['toJSON'] = function toJSON() {
-            return Object.assign({}, this[key])
-        }
-    }
-}
-
-/**
- * Maps a top-level JSON property to a prototype property in the decoding object. The property names should match
- * verbatim in the JSON. The value will be unmodified and assigned to the property.
- *
- * @example
- *   @jsonProperty
- *   public name: string
- */
-export function jsonProperty<T extends DecoderConstructableTarget>(target: T, key: string) {
-    debug(`${target.constructor.name} applying jsonProperty to ${key}`)
-
-    const map = decoderMapForTarget(target.constructor)
-    map[key] = {
-        key
-    }
-}
-
-/**
- *
- * @example
- *   // Maps 'index' in the JSON to `_index` on the decoding object
- *   @jsonPropertyAlias('index')
- *   private _index: number
- *
- *   // Maps 'model.serialNumber' in the JSON to `serial` on the decoding object, and converts the value to a Number if
- *   // not already a Number
- *   @jsonPropertyAlias('model.serialNumber', Number)
- *   public serial: number
- *
- *   // Used default mapping, and converts a single property value or array to an array of Strings.
- *   @jsonPropertyAlias(undefined, [String])
- *   public flags: Array<String>
- *
- * @param keyPath
- * @param type
- * @param mapFunction
- */
-export function jsonPropertyAlias(
-    keyPath?: string,
-    type?: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget | Array<DecoderPrototypalTarget>,
-    mapFunction?: (value: any) => any
-) {
-    if (keyPath !== undefined && typeof keyPath !== 'string') {
-        throw new TypeError('jsonPropertyAlias(keyPath) should be a non-empty String')
-    }
-    if (Array.isArray(type) && type.length !== 1) {
-        throw new TypeError('jsonPropertyAlias(type) should have exactly one element for Array types')
-    }
-
-    return (target: DecoderConstructableTarget, key: string) => {
-        const rootType = Array.isArray(type) ? type[0] : type
-        if (rootType) {
-            const elementType = isDecoderPrototypalCollectionTarget(rootType) ? rootType.collection : rootType
-            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}, marshalling using ${elementType.name}`)
-        } else {
-            debug(`${target.constructor.name} applying jsonPropertyAlias ${keyPath} to ${key}`)
-        }
-        
-        const map = decoderMapForTarget(target.constructor)
-
-        // For backwards compatibility
-        if (Array.isArray(type)) {
-            type = {
-                collection: Array,
-                element: type[0]
-            }
-        }
-
-        // Assign the property to the map
-        if (type !== undefined) {
-            map[key] = {
-                key: keyPath || key,
-                type,
-                mapFunction
-            }
-        } else {
-            map[key] = {
-                key: keyPath || key,
-                mapFunction
-            }
-        }
-    }
-}
-
-/**
- *
- * @param keyPath - key path to the property from the root for the JSON
- * @param [type] - marshalable type to covert a property to
- * @param {PropertyDescriptor} descriptor
- * @returns
- */
-export function jsonPropertyHandler(keyPath: string, type?: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget) {
-    if (typeof keyPath !== 'string') {
-        throw new TypeError('jsonPropertyHandler(keyPath) should be a non-empty String')
-    }
-    if (Array.isArray(type) && type.length !== 1) {
-        throw new TypeError('jsonPropertyHandler(type) should have exactly one element for Array types')
-    }
-
-    return <T extends DecoderConstructableTarget>(
-        target: T,
-        key: string,
-        descriptor: PropertyDescriptor
-    ): PropertyDescriptor => {
-        debug(`${target.constructor.name} applying jsonPropertyHandler ${keyPath} to ${key}`)
-
-        let notifiers: Map<String, Array<DecoderMapAliasEntry>> = Reflect.getOwnMetadata(
-            DecoderMetadataKeys.decoderNotifiers,
-            target.constructor
-        )
-        if (!notifiers) {
-            notifiers = new Map()
-            Reflect.defineMetadata(DecoderMetadataKeys.decoderNotifiers, notifiers, target.constructor)
-        }
-        let propertyNotifiers = notifiers.get(keyPath)
-        if (!propertyNotifiers) {
-            propertyNotifiers = []
-            notifiers.set(keyPath, propertyNotifiers)
-        }
-        propertyNotifiers.push({
-            key: keyPath,
-            type,
-            mapFunction: descriptor.value
-        })
-
-        return descriptor
-    }
-}
-
-export function jsonDecoderFactory(target: DecoderPrototypalTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    debug(`${target.name} applying jsonDecoderFactory to ${key}`)
-    Reflect.defineMetadata(DecoderMetadataKeys.decoderFactory, target[key], target)
-    return descriptor
-}
-
-/**
- * Specifies the decoder function. This decoration behaves differently depending on the placement on the
- * class(static function)/constructor function itself, or on the class prototype. Both may be used, if desired.
- * In both case the source JSON object will be supplied to aid decoding.
- *
- * When applied to the class (static function) the decoder function must return the decoded object, or initialize
- * and object to begin decoding. Returning undefined will fallback to the default object creation, returning null will
- * invalidate decoding.
- *
- * When applied to a prototype function, the decoding object will have been created. The function must return this or
- * a replacement object. Returning undefined will fallback and use the same decoding object already created, returning
- * nulll will invalidate the decoding.
- *
- * Errors thrown here will be propagated
- *
- * @example
- *   @jsonDecoder
- *   function decoder(json: Object): MyClass | null { ... }
- */
-export function jsonDecoder(target: DecoderConstructableTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    debug(`${target.constructor.name} applying jsonDecoder to ${key}`)
-    Reflect.defineMetadata(DecoderMetadataKeys.decoder, target[key], target)
-    return descriptor
-}
-
-/**
- * Specifies the function called on the decoded object when decoding has completed. At this point all properties have
- * been assigned, and all property handler functions called. `jsonDecoderCompleted` only can be called on prototype
- * functions, and provides a last chance to perform any additional decoding, validation, or invalidation.
- *
- * Like `jsonDecoder` returning `null` invalidates the decoded object.
- *
- * Errors thrown here will be propagated
- *
- * @example
- *   @jsonDecoderComplete
- *   function decoder(json: Object): MyClass | null { ... }
- */
-export function jsonDecoderCompleted(target: DecoderConstructableTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    debug(`${target.constructor.name} applying jsonDecoderCompleted to ${key}`)
-    Reflect.defineMetadata(DecoderMetadataKeys.decoderCompleted, target[key], target)
-    return descriptor
-}
+import { JsonObject } from './json-decodable-types'
+import { JsonDecodableOptions } from './json-decorators'
+import { JsonDecoderMetadataKeys } from './json-symbols'
 
 /**
  * JSON decoder for JSON decodable classes
  */
+// tslint:disable:no-unnecessary-class
 export class JsonDecoder {
     /**
      * Decodes a JSON object or String returning back the object if it was able to be decoded
@@ -293,7 +26,7 @@ export class JsonDecoder {
      * @param classType - Decodeable class type
      * @return results of the decoding
      */
-    static decode<T extends Object>(objectOrString: string | JsonObject, classType: DecoderPrototypalTarget): T | null {
+    static decode<T extends object>(objectOrString: string | JsonObject, classType: DecoderPrototypalTarget): T | null {
         if (objectOrString === null || objectOrString === undefined) {
             return null
         }
@@ -327,13 +60,13 @@ export class JsonDecoder {
             }
         }
         if (!decodeObject) {
-            const options = <JsonDecodableOptions>Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, classType)
+            const options = <JsonDecodableOptions> Reflect.getOwnMetadata(DecoderMetadataKeys.decodableOptions, classType)
             if (options && options.useConstructor) {
-                const constructable = <ObjectConstructor>classType
+                const constructable = classType as ObjectConstructor
                 decodeObject = new constructable()
             } else {
                 // Instantiate the object, without calling the constructor
-                decodeObject = <T>Object.create(classType.prototype)
+                decodeObject = Object.create(classType.prototype) as T
             }
         }
 
@@ -344,7 +77,7 @@ export class JsonDecoder {
         }
 
         // Walk the prototype chain, adding the constructor functions in reverse order
-        const classConstructors: Array<DecoderPrototypalTarget> = []
+        const classConstructors: DecoderPrototypalTarget[] = []
         let prototype = classType.prototype
         while (prototype !== Object.prototype) {
             if (!!Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, prototype.constructor)) {
@@ -367,8 +100,8 @@ export class JsonDecoder {
 
             // Look up decoder map for the constructor function
             const decoderMap = decoderMapForTarget(constructor)
-            for (const key in decoderMap) {
-                const mapEntry = <DecoderMapEntry>decoderMap[key]
+            for (const key of Reflect.ownKeys(decoderMap)) {
+                const mapEntry = decoderMap[key] as DecoderMapEntry
                 const value = evaluatePropertyValue(object, mapEntry, decodeObject)
                 if (value !== undefined) {
                     decodeObject[key] = value
@@ -379,9 +112,9 @@ export class JsonDecoder {
         // Iterate through the class heirarchy for prototype decoders, this time calling all the property notifiers
         // This is done after all mapped properties have been assigned
         for (const constructor of classConstructors) {
-            const propertyNotifiers: Map<String, Array<DecoderMapAliasEntry>> = Reflect.getOwnMetadata(
+            const propertyNotifiers: Map<string, DecoderMapEntry[]> = Reflect.getOwnMetadata(
                 DecoderMetadataKeys.decoderNotifiers,
-                constructor
+                constructor,
             )
             if (propertyNotifiers) {
                 for (const handlers of propertyNotifiers.values()) {
@@ -390,9 +123,9 @@ export class JsonDecoder {
                             object,
                             {
                                 key: handler.key,
-                                type: handler.type
+                                type: handler.type,
                             },
-                            decodeObject
+                            decodeObject,
                         )
                         if (value !== undefined) {
                             // TODO: Capture errors from handlers
@@ -429,15 +162,15 @@ export class JsonDecoder {
      * @param object
      * @return
      */
-    static decodeArray<T extends Object>(
-        objectOrString: string | Array<JsonObject>,
-        classType: DecoderPrototypalTarget
+    static decodeArray<T extends object>(
+        objectOrString: string | JsonObject[],
+        classType: DecoderPrototypalTarget,
     ): [T] | null {
         if (objectOrString === null || objectOrString === undefined) {
             return null
         }
 
-        let objects: Array<Object>
+        let objects: object[]
         if (typeof objectOrString === 'string') {
             objects = JSON.parse(objectOrString)
         } else if (Array.isArray(objectOrString)) {
@@ -446,7 +179,7 @@ export class JsonDecoder {
             throw new TypeError('decode(object) should be an Array of Objects or a String')
         }
 
-        return <[T]>objects.map<T | null>((object) => this.decode<T>(object, classType)).filter((object) => !!object)
+        return objects.map<T | null>((object) => this.decode<T>(object, classType)).filter((object) => !!object) as [T]
     }
 }
 
@@ -456,20 +189,22 @@ export class JsonDecoder {
 
 /**
  * Creates a marshaller for a given type declaration to use for conversion
- * 
+ *
  * @param type - desired conversion type
  * @return conversion function or undefined
  */
-function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget): ((value: any, strict?: boolean) => any) | undefined {
+function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget):
+    ((value: any, strict?: boolean) => any) | undefined
+{
     if (isDecoderPrototypalCollectionTarget(type)) {
         let collectionMarshaller: CollectionMarshallerFunction | undefined
         if (Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, type.collection)) {
             collectionMarshaller = (value: any, itemMarhsaller?: MarshallerFunction, strict?: boolean) => {
-                if (typeof value === 'boolean' 
-                    || typeof value === 'number' 
-                    || typeof value === 'string' 
+                if (typeof value === 'boolean'
+                    || typeof value === 'number'
+                    || typeof value === 'string'
                     || (typeof value === 'object' && value !== null)) {
-                    return JsonDecoder.decode(value, type.collection)   
+                    return JsonDecoder.decode(value, type.collection)
                 }
                 if (strict) {
                     throw new TypeError(`${typeof value} cannot be converted to ${type.collection.name}`)
@@ -486,6 +221,7 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
         }
 
         const elementMarshaller = createMarshaller(type.element)
+
         return (value: any, strict?: boolean) => {
             return collectionMarshaller!(value, elementMarshaller, strict)
         }
@@ -506,10 +242,10 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
  * @throws TypeError
  */
 function evaluatePropertyValue(
-    object: Object,
+    object: object,
     mapEntry: DecoderMapEntry,
-    decodeObject: Object,
-    strict: boolean = false
+    decodeObject: object,
+    strict: boolean = false,
 ): any {
     if (!object) {
         return undefined
@@ -522,7 +258,7 @@ function evaluatePropertyValue(
     let decoderMapEntry: DecoderMapEntry
     if (typeof mapEntry === 'string') {
         decoderMapEntry = {
-            key: mapEntry
+            key: mapEntry,
         }
     } else {
         decoderMapEntry = mapEntry
@@ -552,12 +288,13 @@ function evaluatePropertyValue(
 
     // Check any type conversion
     if (decoderMapEntry.type) {
-        let marshaller = createMarshaller(decoderMapEntry.type)
+        const marshaller = createMarshaller(decoderMapEntry.type)
         if (marshaller) {
             value = marshaller(value, strict)
         } else {
             if (strict) {
-                const rootType = isDecoderPrototypalCollectionTarget(decoderMapEntry.type) ? decoderMapEntry.type.collection : decoderMapEntry.type
+                const rootType =
+                    isDecoderPrototypalCollectionTarget(decoderMapEntry.type) ? decoderMapEntry.type.collection : decoderMapEntry.type
                 throw new TypeError(`${rootType.name} is not a JSON decodable type`)
             }
 
