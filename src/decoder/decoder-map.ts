@@ -4,13 +4,12 @@
  * Type and interfaces to support decoder mapping
  */
 
-import 'reflect-metadata'
-import { DecoderPrototypalTarget, DecoderPrototypalCollectionTarget, DecoderMetadataKeys } from './decoder-declarations'
+import { DecoderMetadataKeys, DecoderPrototypalCollectionTarget, DecoderPrototypalTarget } from './decoder-declarations'
 
 /**
  * Decoder map alias entry in a decoder configuration map
  */
-export interface DecoderMapAliasEntry {
+export interface DecoderMapEntry {
     /**
      * JSON property key
      */
@@ -18,34 +17,19 @@ export interface DecoderMapAliasEntry {
     /**
      * Type to marshal a property value to
      */
-    type?: Object & (DecoderPrototypalTarget | DecoderPrototypalCollectionTarget)
+    type?: object & (DecoderPrototypalTarget | DecoderPrototypalCollectionTarget)
     /**
      * Map function taking the marshaled value (array, object or scalar) and applies another level of mapping
      */
-    mapFunction?: (value: any) => any
+    mapFunction?(value: any): any
 }
-
-/**
- * Decoder map entry in a decoder configuration map
- */
-export type DecoderMapEntry = DecoderMapAliasEntry | string
 
 /**
  * Decoder configuration map
  * A key/entry pair for properties to map JSON properties to decoded object properties
  */
-export interface DecoderMap {
-    [key: string]: DecoderMapEntry
-}
+export interface DecoderMap extends Record<string, DecoderMapEntry | undefined>{
 
-/**
- * JSON-Schema desclaration for a decoder map
- */
-export interface DecoderMapSchema {
-    /**
-     * JSON schema declaration in a parsed JSON object
-     */
-    schema: Object
 }
 
 /**
@@ -56,22 +40,33 @@ export interface DecoderMapSchema {
  * @return decoder map object to assign JSON decoding configuration to
  */
 export function decoderMapForTarget(target: DecoderPrototypalTarget): DecoderMap {
-    let map = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target) || target[DecoderMetadataKeys.decoderMap]
+    const map = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target) || target[DecoderMetadataKeys.decoderMap]
     if (map) {
         return map
     }
 
     // Set an empty decoder map
-    setDecoderMapForTarget(target, {})
+    Reflect.defineMetadata(DecoderMetadataKeys.decoderMap, {}, target)
+
     return Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target)!
 }
 
 /**
- * Overrides the decoder map for a given target class type
+ * Returns a decoder map entry given a entry key and a target class type
  *
+ * @param key - property key on the target
  * @param target - target constructor function
  * @param decoderMap - decoder map to assign to the class type
  */
-export function setDecoderMapForTarget(target: DecoderPrototypalTarget, decoderMap: DecoderMap) {
-    Reflect.defineMetadata(DecoderMetadataKeys.decoderMap, decoderMap, target)
+export function decoderMapEntryForTarget(key: string, target: DecoderPrototypalTarget): DecoderMapEntry {
+    const decoderMap = decoderMapForTarget(target)
+    let entry = decoderMap[key]
+    if (entry === undefined) {
+        entry = {
+            key,
+        }
+        decoderMap[key] = entry
+    }
+
+    return entry
 }
