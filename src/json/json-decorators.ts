@@ -63,15 +63,7 @@ export function jsonDecodable(options?: JsonDecodableOptions) {
  * Json schema as used by a JSON decodeable object
  */
 export interface JsonDecodableSchema {
-    /**
-     * Root schema object
-     */
-    schema: object
 
-    /**
-     * Root schema dependency schemas
-     */
-    dependencies?: object[]
 }
 
 /**
@@ -80,7 +72,7 @@ export interface JsonDecodableSchema {
  *
  * @param schema - JSON schema configuration
  */
-export function jsonSchema(schema: JsonDecodableSchema) {
+export function jsonSchema(schema: JsonDecodableSchema, ...references: JsonDecodableSchema[]) {
     return <T extends DecoderPrototypalTarget>(target: T): T => {
         debug(`${target.name} applying jsonSchema`)
         Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, schema, target)
@@ -92,12 +84,12 @@ export function jsonSchema(schema: JsonDecodableSchema) {
             format: 'full',
             jsonPointers: true,
         })
-        ajvErrors(jsonSchema)
+        ajvErrors(schemaCompiler)
 
-        if (Array.isArray(schema.dependencies)) {
-            schemaCompiler.addSchema(schema.dependencies)
+        if (Array.isArray(references)) {
+            references.forEach(reference => schemaCompiler.addSchema(reference))
         }
-        const validator = schemaCompiler.compile(schema.schema)
+        const validator = schemaCompiler.compile(schema)
         Reflect.defineMetadata(JsonDecoderMetadataKeys.schemaValidator, validator, target)
 
         return target
