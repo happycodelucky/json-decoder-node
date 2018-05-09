@@ -4,6 +4,8 @@
 
 import 'reflect-metadata'
 
+import { ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
+
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
 import { DecoderMapEntry, decoderMapForTarget } from '../decoder/decoder-map'
@@ -12,8 +14,10 @@ import { CollectionMarshallerFunction, MarshallerFunction } from '../marshallers
 import { collectionMarshallerForType, marshallerForType } from '../marshallers/marshallers'
 
 import { JsonObject } from './json-decodable-types'
+import { JsonDecoderValidationError } from './json-decoder-errors'
 import { JsonDecodableOptions } from './json-decorators'
 import { JsonDecoderMetadataKeys } from './json-symbols'
+import { JsonValidationError, JsonValidatorPropertyMissingError, JsonValidatorPropertyValueError } from './json-validation-errors'
 
 /**
  * JSON decoder for JSON decodable classes
@@ -34,6 +38,7 @@ export class JsonDecoder {
         // Extract our JSON object
         let object: object
         if (typeof objectOrString === 'string') {
+            // Will throw an exception if the JSON has a syntax error
             object = JSON.parse(objectOrString)
         } else if (Array.isArray(objectOrString) || typeof objectOrString === 'object') {
             // Arrays are objects too, and can be queried with @0.value
@@ -60,7 +65,7 @@ export class JsonDecoder {
             }
         }
         if (!decodeObject) {
-            const options = <JsonDecodableOptions> Reflect.getOwnMetadata(DecoderMetadataKeys.decodableOptions, classType)
+            const options = Reflect.getOwnMetadata(DecoderMetadataKeys.decodableOptions, classType) as JsonDecodableOptions | undefined
             if (options && options.useConstructor) {
                 const constructable = classType as ObjectConstructor
                 decodeObject = new constructable()
@@ -69,6 +74,10 @@ export class JsonDecoder {
                 decodeObject = Object.create(classType.prototype) as T
             }
         }
+
+        // Validate the JSON
+        // This will throw an exception if not valid
+        validatedSourceJson(classType, object)
 
         // Check if a context needs to be set
         const contextKey = Reflect.getMetadata(JsonDecoderMetadataKeys.context, classType)
@@ -312,4 +321,131 @@ function evaluatePropertyValue(
     }
 
     return value
+}
+
+/**
+ * Validates a schema defined on a target against the source JSON.
+ * If the JSON is not valid then a JsonDecoderValidatorError exception is thrown
+ *
+ * @param target - target class to take defined schema from
+ * @param json - JSON object
+ * @returns true if the schema was valid (JsonDecoderValidatorError exception thrown otherwise)
+ */
+function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject): boolean {
+    const validator = Reflect.getMetadata(JsonDecoderMetadataKeys.schemaValidator, target) as ValidateFunction | undefined
+    if (validator) {
+        const validatorResult = validator(json)
+        if (typeof validatorResult === 'boolean') {
+            if (!validatorResult) {
+                // Collect the errors produced by the validator
+                const errors = validator.errors
+                const validationErrors: JsonValidationError[] = []
+                if (errors) {
+                    errors.map(error => {
+                        let ajvError: ErrorObject | undefined = error
+
+                        // Check for explicit error messages
+                        let errorMessage: string
+                        let propertyPath: string
+                        if (error.keyword === 'errorMessage') {
+                            const params: any = error.params
+
+                            // tslint:disable-next-line:prefer-conditional-expression
+                            if ('errors' in params && Array.isArray(params.errors) && params.errors.length > 0) {
+                                ajvError = params.errors[0]
+                                propertyPath = convertJsonPointerToKeyPath(ajvError!.dataPath)
+                                errorMessage = propertyPath
+                                    ? `'${propertyPath}' ${error.message}`
+                                    : errorMessage = `Root object ${error.message}`
+                            } else {
+                                ajvError = undefined
+                                propertyPath = '???'
+                                errorMessage = error.message!
+                            }
+                        } else {
+                            propertyPath = convertJsonPointerToKeyPath(error.dataPath)
+                            errorMessage = propertyPath
+                                ? `'${propertyPath}' ${error.message}`
+                                : errorMessage = `Root object ${error.message}`
+                        }
+
+                        if (ajvError) {
+                            if (ajvError.keyword === 'required') {
+                                validationErrors.push(
+                                    new JsonValidatorPropertyMissingError(
+                                        propertyPath,
+                                        (error.params as RequiredParams).missingProperty,
+                                        errorMessage))
+                            } else {
+                                validationErrors.push(
+                                    new JsonValidatorPropertyValueError(
+                                        propertyPath,
+                                        valueFromJsonPointer(ajvError!.dataPath, json),
+                                        errorMessage))
+                            }
+                        }
+                    })
+                }
+
+                // Throw a single error with all the specific validation
+                throw new JsonDecoderValidationError(validationErrors, json)
+            }
+        } else {
+            throw TypeError('Async schema validation not supported')
+        }
+    }
+
+    return true
+}
+
+/**
+ * Extracts the value from a json object based on a JSON pointer path
+ *
+ * @param pointer - pointer path
+ * @param json - source JSON object
+ * @returns a value, or undefined if not available
+ */
+function valueFromJsonPointer(pointer: string, json: JsonObject): any {
+    const keys = pointer.split('/').filter(part => !!part)
+
+    let value = json
+    while (keys.length > 0) {
+        const key = keys.shift()!
+        if (!(key in value)) {
+            return undefined
+        }
+
+        value = value[key]
+    }
+
+    return value
+}
+
+/**
+ * Converts a JSON pointer path to a key path that is more human friendly
+ *
+ * @param pointer - pointer path
+ * @param otherKeys - other keys to append to the result key path
+ * @returns JSON key path
+ */
+function convertJsonPointerToKeyPath(pointer: string, ...otherKeys: string[]): string {
+    const parts = pointer.split('/').filter(part => !!part)
+    if (otherKeys && otherKeys.length > 0) {
+        parts.push(...otherKeys)
+    }
+
+    let dotPath = ''
+    while (parts.length > 0) {
+        const part = parts.shift()!
+        if (/^[0-9]+$/.test(part)) {
+            dotPath += `[${part}]`
+        } else {
+            if (dotPath.length > 0) {
+                dotPath += '.'
+            }
+            dotPath += part
+        }
+    }
+
+    return dotPath
 }
