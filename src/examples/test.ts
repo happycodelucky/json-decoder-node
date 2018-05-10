@@ -7,17 +7,29 @@ import { JsonDecoderValidationError } from '../json/json-decoder-errors';
     $schema: 'http://json-schema.org/draft-07/schema',
     description: 'Sub type',
     type: 'object',
-    required: ['value'],
+    required: ['value', 'testValue'],
+    dependencies: {
+        value: ['testValue'],
+    },
+    additionalProperties: false,
     properties: {
         value: {
             type: ['string', 'number'],
         },
+        testValue: {
+            type: 'boolean',
+        },
     },
     errorMessage: {
-        _: 'should be a number or a string representing a number',
+        _: '{{propertyPath}} should be a number or a string representing a number',
         required: {
-            value: 'should be defined as a string or number value',
+            value: '{{propertyPath}} should be defined as a string or number value',
+            testValue: '',
         },
+        dependencies: {
+            value: 'Using {{propertyPath}} required {{missingProperty}} be set',
+        },
+        additionalProperties: 'FAIL! {{additionalProperty}}',
     },
 })
 class SubType {
@@ -39,7 +51,7 @@ class SubType {
     },
     errorMessage: {
         required: {
-            subType: 'missing fool',
+            subType: '{{missingProperty}} missing fool from {{propertyPath}}',
         },
     },
 })
@@ -56,7 +68,10 @@ class Test {
 try {
     const t = JsonDecoder.decode<Test>({
         subType: {
-            value: 1,
+        //     value: 1,
+        //    testValue: true,
+           wayne: false,
+           //john: false,
         },
     }, Test)
 
