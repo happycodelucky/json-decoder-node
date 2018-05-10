@@ -53,7 +53,7 @@ gulp.task("lint", function() {
 
 gulp.task("build-lib", function() {
     const project = tsc.createProject("tsconfig.json", {
-        module : "umd",
+        module : "commonjs",
         target: 'es2016',
         typescript: require("typescript")
     });
