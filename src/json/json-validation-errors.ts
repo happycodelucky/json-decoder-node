@@ -6,7 +6,7 @@ import { JsonDecoderError } from './json-decoder-errors'
 /**
  * Base error for all validation errors
  */
-export class JsonValidationError extends JsonDecoderError { }
+export abstract class JsonValidationError extends JsonDecoderError { }
 
 /**
  * Base error for all validation property errors

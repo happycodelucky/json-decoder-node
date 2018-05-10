@@ -4,18 +4,22 @@
 
 import 'reflect-metadata'
 
+import * as ajv from 'ajv'
+// @ts-ignore
+import * as ajvErrors from 'ajv-errors'
+
 import { ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
 
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
-import { DecoderMapEntry, decoderMapForTarget } from '../decoder/decoder-map'
+import { DecoderMapEntry, decoderMapForTarget, DecoderMap } from '../decoder/decoder-map'
 
 import { CollectionMarshallerFunction, MarshallerFunction } from '../marshallers/marshallers'
 import { collectionMarshallerForType, marshallerForType } from '../marshallers/marshallers'
 
 import { JsonObject } from './json-decodable-types'
 import { JsonDecoderValidationError } from './json-decoder-errors'
-import { JsonDecodableOptions } from './json-decorators'
+import { JsonDecodableOptions, JsonDecoderSchemaMetadata, JsonDecodableSchema } from './json-decorators'
 import { JsonDecoderMetadataKeys } from './json-symbols'
 import { JsonValidationError, JsonValidatorPropertyMissingError, JsonValidatorPropertyValueError } from './json-validation-errors'
 
@@ -332,70 +336,185 @@ function evaluatePropertyValue(
  * @returns true if the schema was valid (JsonDecoderValidatorError exception thrown otherwise)
  */
 function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject): boolean {
-    const validator = Reflect.getMetadata(JsonDecoderMetadataKeys.schemaValidator, target) as ValidateFunction | undefined
-    if (validator) {
-        const validatorResult = validator(json)
-        if (typeof validatorResult === 'boolean') {
-            if (!validatorResult) {
-                // Collect the errors produced by the validator
-                const errors = validator.errors
-                const validationErrors: JsonValidationError[] = []
-                if (errors) {
-                    errors.map(error => {
-                        let ajvError: ErrorObject | undefined = error
+    // If there is nothing to validate then it's valid
+    if (!Reflect.hasMetadata(JsonDecoderMetadataKeys.schema, target)) {
+        return true
+    }
 
-                        // Check for explicit error messages
-                        let errorMessage: string
-                        let propertyPath: string
-                        if (error.keyword === 'errorMessage') {
-                            const params: any = error.params
-
-                            // tslint:disable-next-line:prefer-conditional-expression
-                            if ('errors' in params && Array.isArray(params.errors) && params.errors.length > 0) {
-                                ajvError = params.errors[0]
-                                propertyPath = convertJsonPointerToKeyPath(ajvError!.dataPath)
-                                errorMessage = propertyPath
-                                    ? `'${propertyPath}' ${error.message}`
-                                    : errorMessage = `Root object ${error.message}`
-                            } else {
-                                ajvError = undefined
-                                propertyPath = '???'
-                                errorMessage = error.message!
-                            }
-                        } else {
-                            propertyPath = convertJsonPointerToKeyPath(error.dataPath)
-                            errorMessage = propertyPath
-                                ? `'${propertyPath}' ${error.message}`
-                                : errorMessage = `Root object ${error.message}`
-                        }
-
-                        if (ajvError) {
-                            if (ajvError.keyword === 'required') {
-                                validationErrors.push(
-                                    new JsonValidatorPropertyMissingError(
-                                        propertyPath,
-                                        (error.params as RequiredParams).missingProperty,
-                                        errorMessage))
-                            } else {
-                                validationErrors.push(
-                                    new JsonValidatorPropertyValueError(
-                                        propertyPath,
-                                        valueFromJsonPointer(ajvError!.dataPath, json),
-                                        errorMessage))
-                            }
-                        }
-                    })
-                }
-
-                // Throw a single error with all the specific validation
-                throw new JsonDecoderValidationError(validationErrors, json)
-            }
-        } else {
-            throw TypeError('Async schema validation not supported')
+    // Fetch an existing validator
+    let validator = Reflect.getMetadata(JsonDecoderMetadataKeys.schemaValidator, target) as ValidateFunction | undefined
+    // Create a new validator if one has not already been created
+    if (!validator) {
+        validator = createSchemaValidator(target)
+        if (validator) {
+            Reflect.defineMetadata(JsonDecoderMetadataKeys.schemaValidator, validator, target)
         }
     }
 
+    // No validator (should not happen)
+    if (!validator) {
+        return true
+    }
+
+    // Attempt validation and report errors
+    const validatorResult = validator(json)
+    if (typeof validatorResult === 'boolean') {
+        if (!validatorResult) {
+            // Collect the errors produced by the validator
+            const errors = validator.errors
+            const validationErrors: JsonValidationError[] = []
+            if (errors) {
+                errors.map(error => {
+                    let ajvError: ErrorObject | undefined = error
+
+                    // Check for explicit error messages
+                    let errorMessage: string
+                    let propertyPath: string
+                    if (error.keyword === 'errorMessage') {
+                        const params: any = error.params
+
+                        // tslint:disable-next-line:prefer-conditional-expression
+                        if ('errors' in params && Array.isArray(params.errors) && params.errors.length > 0) {
+                            ajvError = params.errors[0]
+                            propertyPath = convertJsonPointerToKeyPath(ajvError!.dataPath)
+                            errorMessage = propertyPath
+                                ? `'${propertyPath}' ${error.message}`
+                                : errorMessage = `Root object ${error.message}`
+                        } else {
+                            ajvError = undefined
+                            propertyPath = '???'
+                            errorMessage = error.message!
+                        }
+                    } else {
+                        propertyPath = convertJsonPointerToKeyPath(error.dataPath)
+                        errorMessage = propertyPath
+                            ? `'${propertyPath}' ${error.message}`
+                            : errorMessage = `Root object ${error.message}`
+                    }
+
+                    if (ajvError) {
+                        if (ajvError.keyword === 'required') {
+                            validationErrors.push(
+                                new JsonValidatorPropertyMissingError(
+                                    propertyPath,
+                                    (error.params as RequiredParams).missingProperty,
+                                    errorMessage))
+                        } else {
+                            validationErrors.push(
+                                new JsonValidatorPropertyValueError(
+                                    propertyPath,
+                                    valueFromJsonPointer(ajvError!.dataPath, json),
+                                    errorMessage))
+                        }
+                    }
+                })
+            }
+
+            // Throw a single error with all the specific validation
+            throw new JsonDecoderValidationError(validationErrors, json)
+        }
+    } else {
+        throw TypeError('Async schema validation not supported')
+    }
+
     return true
+}
+
+/**
+ * Create a new schema validator for a target. If the target does not support JSON schema no validator function will be returned
+ *
+ * @param target - target class to take defined schema, and schema references from
+ * @returns
+ */
+function createSchemaValidator(target: DecoderPrototypalTarget): ajv.ValidateFunction | undefined {
+    const metadataSchema: JsonDecoderSchemaMetadata = Reflect.getMetadata(JsonDecoderMetadataKeys.schema, target)
+    if (!metadataSchema) {
+        return undefined
+    }
+
+    // Schema options
+    const schemaCompiler = ajv({
+        allErrors: true,
+        async: false,
+        verbose: true,
+        format: 'full',
+        jsonPointers: true, // Required for ajvErrors
+    })
+    ajvErrors(schemaCompiler)
+
+    // Flatten all the references and ensure there is only one version of each
+    const referenceSchemas = flattenSchemaReferences(target).reduce((result, reference) => {
+        if (!result.has(reference.$id!)) {
+            result.set(reference.$id!, reference)
+        }
+
+        return result
+    }, new Map<string, JsonDecodableSchema>())
+
+    // Add all references and compile
+    for (const referenceSchema of referenceSchemas.values()) {
+        schemaCompiler.addSchema(referenceSchema)
+    }
+    const validator = schemaCompiler.compile(metadataSchema.schema)
+
+    return validator
+}
+
+/**
+ * Flattens all schema references from the target down
+ *
+ * @param target - target class to take defined schema references from
+ * @param [includeRootSchema=false] - Used for recursion
+ * @returns Flattened schemas to add as reference definitions
+ */
+function flattenSchemaReferences(
+    target: DecoderPrototypalTarget | JsonDecodableSchema,
+    includeRootSchema: boolean = false): JsonDecodableSchema[]
+{
+    const schemas: JsonDecodableSchema[] = []
+
+    const metadataSchema: JsonDecoderSchemaMetadata = Reflect.getMetadata(JsonDecoderMetadataKeys.schema, target)
+    if (metadataSchema) {
+        if (!('$schema' in metadataSchema.schema)) {
+            throw new TypeError(`Missing '$schema' declaration in ${target.name || target.$id} schema`)
+        }
+
+        if (includeRootSchema) {
+            const mutableSchema: JsonDecodableSchema = {...metadataSchema.schema}
+            if (!mutableSchema.$id) {
+                // Use the target name as the ID
+                mutableSchema.$id = `#/${target.name}`
+            }
+            schemas.push(mutableSchema)
+        }
+
+        // Flatten reference schemas.
+        // These could be class declarations with schemas attached or schemas themselves
+        if (metadataSchema.references && Array.isArray(metadataSchema.references)) {
+            metadataSchema.references.forEach(reference => {
+                if (!!Reflect.getMetadata(JsonDecoderMetadataKeys.schema, reference)) {
+                    schemas.push(...flattenSchemaReferences(reference, true))
+                } else if ('$schema' in reference) {
+                    schemas.push(reference as JsonDecodableSchema)
+                } else {
+                    throw new TypeError(`Missing '$schema' declaration in schema references for ${target.name}`)
+                }
+            })
+        }
+
+        // Enumeration the decoder map to automatically inject schema references
+        const decoderMap = Reflect.getMetadata(DecoderMetadataKeys.decoderMap, target) as DecoderMap | undefined
+        if (decoderMap) {
+            for (const key of Reflect.ownKeys(decoderMap)) {
+                const mapEnty = decoderMap[key]
+                if (mapEnty && mapEnty.type && Reflect.hasMetadata(JsonDecoderMetadataKeys.schema, mapEnty.type)) {
+                    schemas.push(...flattenSchemaReferences(mapEnty.type as DecoderPrototypalTarget, true))
+                }
+            }
+        }
+    }
+
+    return schemas
 }
 
 /**

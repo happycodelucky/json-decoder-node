@@ -4,9 +4,6 @@
 
 import 'reflect-metadata'
 
-import * as ajv from 'ajv'
-// @ts-ignore
-import * as ajvErrors from 'ajv-errors'
 import * as createDebugLog from 'debug'
 
 import { DecoderConstructableTarget, DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
@@ -61,9 +58,19 @@ export function jsonDecodable(options?: JsonDecodableOptions) {
 
 /**
  * Json schema as used by a JSON decodeable object
+ * TODO: Use an interface describing the supported schema version (not available in ajv)
  */
-export interface JsonDecodableSchema {
+export interface JsonDecodableSchema extends Record<string, any> {
+    $schema: string
+    $id?: string
+}
 
+/**
+ * Interface for schema metadata set on a target
+ */
+export interface JsonDecoderSchemaMetadata {
+    schema: JsonDecodableSchema,
+    references?: (JsonDecodableSchema | DecoderPrototypalTarget)[]
 }
 
 /**
@@ -71,26 +78,16 @@ export interface JsonDecodableSchema {
  * See http://json-schema.org/
  *
  * @param schema - JSON schema configuration
+ * @param references - JSON decodable classes or schema references
  */
-export function jsonSchema(schema: JsonDecodableSchema, ...references: JsonDecodableSchema[]) {
+export function jsonSchema(schema: JsonDecodableSchema, ...references: (JsonDecodableSchema | DecoderPrototypalTarget)[]) {
     return <T extends DecoderPrototypalTarget>(target: T): T => {
         debug(`${target.name} applying jsonSchema`)
-        Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, schema, target)
-
-        const schemaCompiler = ajv({
-            allErrors: true,
-            async: false,
-            verbose: true,
-            format: 'full',
-            jsonPointers: true,
-        })
-        ajvErrors(schemaCompiler)
-
-        if (Array.isArray(references)) {
-            references.forEach(reference => schemaCompiler.addSchema(reference))
+        const schemaMetadata: JsonDecoderSchemaMetadata = {
+            schema,
+            references,
         }
-        const validator = schemaCompiler.compile(schema)
-        Reflect.defineMetadata(JsonDecoderMetadataKeys.schemaValidator, validator, target)
+        Reflect.defineMetadata(JsonDecoderMetadataKeys.schema, schemaMetadata, target)
 
         return target
     }
@@ -156,7 +153,7 @@ export function jsonProperty<T extends DecoderConstructableTarget>(target: T, ke
  *
  * @param keyPath - path to the property, or undefined to use property name
  */
-export function jsonAliasProperty(keyPath: string) {
+export function jsonPropertyAlias(keyPath: string) {
     if (typeof keyPath !== 'string' || keyPath.length === 0) {
         throw new TypeError('jsonProperty(keyPath) should be a non-empty String')
     }
