@@ -41,6 +41,11 @@ export abstract class JsonValidatorPropertyError extends JsonValidationError {
 export class JsonValidatorPropertyMissingError extends JsonValidatorPropertyError {}
 
 /**
+ * Error when validation finds a property not supported by the schema
+ */
+export class JsonValidatorPropertyUnsupportedError extends JsonValidatorPropertyError {}
+
+/**
  * Error when validation finds a property value to be invalid declaration
  */
 export class JsonValidatorPropertyValueError extends JsonValidatorPropertyError {
