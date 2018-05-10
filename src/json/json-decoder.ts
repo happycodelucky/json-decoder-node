@@ -12,14 +12,14 @@ import { ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
 
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
-import { DecoderMapEntry, decoderMapForTarget, DecoderMap } from '../decoder/decoder-map'
+import { DecoderMap, DecoderMapEntry, decoderMapForTarget } from '../decoder/decoder-map'
 
 import { CollectionMarshallerFunction, MarshallerFunction } from '../marshallers/marshallers'
 import { collectionMarshallerForType, marshallerForType } from '../marshallers/marshallers'
 
 import { JsonObject } from './json-decodable-types'
 import { JsonDecoderValidationError } from './json-decoder-errors'
-import { JsonDecodableOptions, JsonDecoderSchemaMetadata, JsonDecodableSchema } from './json-decorators'
+import { JsonDecodableOptions, JsonDecodableSchema, JsonDecoderSchemaMetadata } from './json-decorators'
 import { JsonDecoderMetadataKeys } from './json-symbols'
 import { JsonValidationError, JsonValidatorPropertyMissingError, JsonValidatorPropertyValueError } from './json-validation-errors'
 
@@ -368,7 +368,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
             const errors = validator.errors
             const validationErrors: JsonValidationError[] = []
             if (errors) {
-                errors.map(error => {
+                errors.map((error: ErrorObject) => {
                     let ajvError: ErrorObject | undefined = error
 
                     // Check for explicit error messages

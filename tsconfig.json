@@ -17,7 +17,7 @@
         "stripInternal": true,
         "target": "es2017",
         "traceResolution": false,
-        "types": ["mocha", "node", "reflect-metadata"],
+        "types": ["ajv", "mocha", "node", "reflect-metadata"],
     },
     "compileOnSave": true,
     "include": [

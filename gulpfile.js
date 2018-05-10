@@ -10,7 +10,7 @@ const tslint      = require("tslint");
 const typescript  = require('typescript');
 
 // Sources
-const SRC_GLOB = 'src/**/**.ts';
+const SRC_GLOB = 'src/**/*.ts';
 const EXAMPLES_GLOB = 'examples/**/**.ts';
 const TEST_GLOB = 'test/**/**.ts';
 
