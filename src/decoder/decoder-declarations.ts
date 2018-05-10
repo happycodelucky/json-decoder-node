@@ -39,20 +39,16 @@ export const DecoderMetadataKeys = {
 /**
  * Any target with a constructor function
  */
-export interface DecoderConstructableTarget {
+export interface DecoderConstructableTarget extends Record<string, any> {
     constructor: Function
-
-    [key: string]: any
 }
 
 /**
  * Any target with a name and prototype object
  */
-export interface DecoderPrototypalTarget {
+export interface DecoderPrototypalTarget extends Record<string, any> {
     name: string
     prototype: object
-
-    [key: string]: any
 }
 
 /**
