@@ -238,6 +238,10 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
         return (value: any, strict?: boolean) => {
             return collectionMarshaller!(value, elementMarshaller, strict)
         }
+    } else if (Reflect.getMetadata(DecoderMetadataKeys.decodable, type)) {
+        return (value: any, strict?: boolean) => {
+            return JsonDecoder.decode<typeof type>(value, type)
+        }
     }
 
     return marshallerForType(type)
