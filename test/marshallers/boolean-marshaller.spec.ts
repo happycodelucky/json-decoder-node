@@ -10,7 +10,7 @@ chai.should()
 
 @suite('Unit: toBoolean')
 // @ts-ignore
-class BooleanTests {
+export class BooleanTests {
 
     @test('undefined tests')
     testUndefined() {
@@ -162,6 +162,8 @@ class BooleanTests {
         toBoolean([[['false']]])!.should.be.false
         toBoolean([[['no']]])!.should.be.false
         toBoolean([[[0]]])!.should.be.false
+
+        // Strict mode
 
         expect(() => toBoolean([true], true)).to.throw(TypeError)
         expect(() => toBoolean([false], true)).to.throw(TypeError)

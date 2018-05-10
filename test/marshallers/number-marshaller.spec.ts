@@ -5,21 +5,29 @@ import { toNumber } from '../../src/marshallers/number-marshaller'
 import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
-// const expect = chai.expect
+const expect = chai.expect
 chai.should()
 
 @suite('Unit: toNumber')
 // @ts-ignore
-class NumberTests {
+export class NumberTests {
 
     @test('undefined tests')
     testUndefined() {
-        toNumber(undefined)!.should.be.undefined
+        expect(toNumber(undefined)).to.be.undefined
+
+        // Strict mode
+
+        expect(toNumber(undefined, true)).to.be.undefined
     }
 
     @test('null tests')
     testNull() {
         toNumber(null)!.should.be.NaN
+
+        // Strict mode
+
+        expect(() => toNumber(null, true)).to.throw(TypeError)
     }
 
     @test('NaN tests')
@@ -28,8 +36,6 @@ class NumberTests {
         toNumber('NaN')!.should.be.NaN
 
         toNumber('')!.should.be.NaN
-        toNumber([])!.should.be.NaN
-        toNumber([1])!.should.be.NaN
         toNumber({})!.should.be.NaN
         toNumber({ foo: 'bar' })!.should.be.NaN
         toNumber({ foo: 1 })!.should.be.NaN
@@ -39,6 +45,23 @@ class NumberTests {
     testBooleanValues() {
         toNumber(true)!.should.be.equal(1)
         toNumber(false)!.should.be.equal(0)
+
+        // Strict mode
+
+        toNumber(true, true)!.should.be.equal(1)
+        toNumber(false, true)!.should.be.equal(0)
+    }
+
+    @test('array value tests')
+    testArrayValues() {
+        expect(toNumber([])).to.be.undefined
+        toNumber([1])!.should.be.equal(1)
+        toNumber([1, 2])!.should.be.equal(1)
+
+        // Strict mode
+
+        expect(() => toNumber([1], true)).to.throw(TypeError)
+        expect(() => toNumber([], true)).to.throw(TypeError)
     }
 
     @test('string base2 integer value tests')
@@ -303,7 +326,7 @@ class NumberTests {
         toNumber('.E+1')!.should.be.NaN
         toNumber('.E-1')!.should.be.NaN
         toNumber('1.1234567890E0')!.should.be.equal(1.123456789)
-        toNumber('+1.1234567890E0')!.should.be.equal(1.12345678)
+        toNumber('+1.1234567890E0')!.should.be.equal(1.123456789)
         toNumber('-1.1234567890E0')!.should.be.equal(-1.123456789)
         toNumber('1.1234567890E1')!.should.be.equal(1.123456789E1)
         toNumber('+1.1234567890E1')!.should.be.equal(1.123456789E1)

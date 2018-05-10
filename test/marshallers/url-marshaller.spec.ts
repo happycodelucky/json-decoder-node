@@ -10,7 +10,7 @@ const expect = chai.expect
 
 @suite('Unit: toURL')
 // @ts-ignore
-class URLTests {
+export class URLTests {
 
     @test('undefined tests')
     testUndefined() {

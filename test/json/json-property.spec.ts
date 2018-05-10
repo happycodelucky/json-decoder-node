@@ -1,5 +1,5 @@
 import * as chai from 'chai'
-import { toURL } from '../../src/marshallers/url-marshaller'
+// import { toURL } from '../../src/marshallers/url-marshaller'
 
 // @ts-ignore
 import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
@@ -26,7 +26,7 @@ class T2 {
 }
 
 @suite('Unit: jsonProperty')
-class URLTests {
+export class URLTests {
 
     @test('constructor initalization')
     testConstructor() {

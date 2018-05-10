@@ -6,10 +6,11 @@ import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
+chai.should()
 
 @suite('Unit: toArray')
 // @ts-ignore
-class ArrayTests {
+export class ArrayTests {
 
     @test('undefined tests')
     testUndefined() {
@@ -22,11 +23,11 @@ class ArrayTests {
 
     @test('null tests')
     testNull() {
-        expect(toArray(null)).to.be.deep.equal([null])
+        expect(toArray(null)).to.be.undefined
 
         // Strict mode
 
-        expect(toArray(null, undefined, true)).to.be.deep.equal([null])
+        expect(() => toArray(null, undefined, true)).to.throw(TypeError)
     }
 
     @test('value tests')

@@ -15,6 +15,10 @@ export function toURL(value: any, strict: boolean = false): URL | undefined {
 
     // Extract 0 index of an array
     if (Array.isArray(value)) {
+        if (strict) {
+            throw new TypeError(`'${value}' does not represent a Boolean`)
+        }
+
         if (value.length > 0) {
             return toURL(value[0], strict)
         } else {

@@ -9,7 +9,7 @@ const expect = chai.expect
 
 @suite('Unit: toString')
 // @ts-ignore
-class StringTests {
+export class StringTests {
 
     @test('undefined tests')
     testUndefined() {
@@ -34,13 +34,13 @@ class StringTests {
         const object1 = {
             foo: 'bar',
         }
-        expect(toString([1, '2', object1])).to.equal('1,2,[object Object]')
-        expect(toString([])).to.be.equal('')
+        expect(toString([1, '2', object1])).to.equal('1')
+        expect(toString([])).to.be.undefined
 
         // Strict mode
 
-        expect(toString([1, '2', object1], true)).to.equal('1,2,[object Object]')
-        expect(toString([], true)).to.be.equal('')
+        expect(() => toString([1, '2', object1], true)).to.throw(TypeError)
+        expect(() => toString([], true)).to.throw(TypeError)
     }
 
     @test('boolean value tests')
@@ -75,6 +75,7 @@ class StringTests {
         expect(toString('foo')).to.be.equal('foo')
 
         // Strict mode
+
         expect(toString('', true)).to.be.equal('')
         expect(toString('foo', true)).to.be.equal('foo')
     }

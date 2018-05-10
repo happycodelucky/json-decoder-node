@@ -9,7 +9,7 @@ const expect = chai.expect
 
 @suite('Unit: toObject')
 // @ts-ignore
-class ObjectTests {
+export class ObjectTests {
 
     @test('undefined tests')
     testUndefined() {
