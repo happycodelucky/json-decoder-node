@@ -220,13 +220,13 @@ export function jsonType(
  *   static decoderClassFactory(json: JsonObject) {
  *       // If 'type' is 'special' in our JSON object, return MySpecialClass to decode
  *       if ('type' in json && json.type === 'special') {
- *           return MySpecialClass
+ *           return new MySpecialClass()
  *       }
  *
- *       return MyClass
+ *       return MyClass()
  *   }
  */
-export function jsonDecoderClassFactory(target: DecoderPrototypalTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
+export function jsonDecoderFactory(target: DecoderPrototypalTarget, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
     debug(`${target.name} applying jsonDecoderFactory to ${key}`)
     Reflect.defineMetadata(DecoderMetadataKeys.decoderFactory, target[key], target)
 
