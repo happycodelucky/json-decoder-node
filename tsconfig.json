@@ -21,9 +21,7 @@
     },
     "compileOnSave": true,
     "include": [
-        "examples/**/*.ts",
-        "src/**/*.ts",
-        "test/**/*.ts"
+        "src/**/*.*"
     ],
     "exclude":[
         "node_modules"
