@@ -1,8 +1,8 @@
 # JSON Decoder
 
-![TypeScript Version](https://img.shields.io/badge/typescript-2.6.3-blue.svg) 
+![TypeScript Version](https://img.shields.io/badge/typescript-2.8.3-blue.svg)
 ![Code Style](https://img.shields.io/badge/codestyle-TypeScript-green.svg)
-![](https://img.shields.io/badge/node-8.9.3-green.svg) 
+![](https://img.shields.io/badge/node-8.11.1-green.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pryomoax/json-decoder/master/LICENSE)
 
 `json-decoder` allows TypeScript and JavaScript projects to adorn class declarations with JSON decoding decorators to support automatic decoding and marshalling of JSON objects to full prototype objects.
@@ -13,15 +13,7 @@
 
 | Version | Description                              |
 | :-----: | ---------------------------------------- |
-|  0.1.x  | In Progress  |
-
-## Distributions
-
-This module is written using [TypeScript](http://typescriptlang.org) and distributed with the following JavaScript support:
-
--  [`json-decoder/dist`](./master/node/dist)
-
-A TypeScript compiler is not required to consume this module
+|  0.4.x  | In Progress  |
 
 ## Usage
 
@@ -62,7 +54,7 @@ Prototype properties can be decorated with `@jsonProperty`, inheriting the proto
 >   // Mapped 'id' property
 >   @jsonProperty
 >   public readonly id: number
-> 
+>
 >   // Mapped 'name' property
 >   @jsonProperty
 >   public readonly name: string
@@ -74,7 +66,7 @@ To decode an `Account` class, use `JsonDecoder.decode` with a JSON object  (or J
 > ```Javascript
 > import { JsonDecoder } from 'json-decoder'
 > import { Account } from './account'
-> 
+>
 > const json = {
 >   id: 1001,
 >   name: 'John Smith',
@@ -99,7 +91,7 @@ The following uses the decorator describing the JSON property `accountId` mapped
 >   // Alias 'id' to 'accountId' property
 >   @jsonAliasProperty('accountId')
 >   public readonly id: number
->   
+>
 >   // ...
 > }
 > ```
@@ -109,7 +101,7 @@ Note the JSON object below is using `accountId` instead of `id`
 > ```Javascript
 > import { JsonDecoder } from 'json-decoder'
 > import { Account } from './account'
-> 
+>
 > const json = {
 >   accountId: 1001,
 >   name: 'John Smith',
@@ -148,7 +140,7 @@ The of interest `name` properties can be flatten
 >
 >   @jsonAliasProperty('name.fullName')
 >   public readonly fullName: string
->   
+>
 >   // ...
 > }
 > ```
@@ -175,26 +167,26 @@ The decode could map index `0` of `profiles` by using `profiles@0`. At the same 
 > @jsonDecodable()
 > class Account {
 >   // ...
->   
+>
 >   @jsonAliasProperty('profiles@0')
 >   public readonly primaryProfile: number
->   
+>
 >   @jsonProperty
 >   public readonly profiles: Array<number>
->   
+>
 >   // ...
 > }
 > ```
 
 Key paths can be a long as the JSON supports. `property.arr@0.anotherProperty.YAP` will attempt to look up `YAP`, the end value. If at any point any sub-property returns `undefined` then `undefined` will be returned. If `null` is returned for any but the last property then `undefined` will be returned, else `null` will be returned.
 
-`@` and `.` are synonmous with one another (subject to change) but provide a more readable structure of intent. That is '.' sub-property, '@' index. `a.b.c` is the same as `a@b@c`. 
+`@` and `.` are synonmous with one another (subject to change) but provide a more readable structure of intent. That is '.' sub-property, '@' index. `a.b.c` is the same as `a@b@c`.
 
 ### Root Indexing
 
 As a convenience, you may use `@index` as an alias, which will attempt to map a source JSON object that is an array, at `index` to the class prototype property.
 
-Using an example of a message protocol from a network request, the message is composed of a `[header, body]` structure. 
+Using an example of a message protocol from a network request, the message is composed of a `[header, body]` structure.
 
 > ```Javascript
 > [
@@ -211,10 +203,10 @@ Decoding the above message use `@jsonAliasProperty('@1.name')`, where `@1` repre
 > @jsonDecodable()
 > class AccountMessage {
 >   // ...
->   
+>
 >   @jsonAliasProperty('@1.name')
 >   public readonly name: string
->   
+>
 >   // ...
 > }
 > ```
@@ -267,15 +259,15 @@ To marshal `profiles` into an `Array` of `Number`
 > @jsonDecodable()
 > class Account {
 >   // ...
->   
+>
 >   @jsonAliasProperty('profiles', [Number])
 >   public readonly profiles: Array<number>
->   
+>
 >   // ...
 > }
 > ```
 
-Array marshalling can also convert a single property value into an array. If the JSON object only had a single scalar property value instead, it will creating an `Array` of one element. 
+Array marshalling can also convert a single property value into an array. If the JSON object only had a single scalar property value instead, it will creating an `Array` of one element.
 
 All element marshaling still apply here too
 
@@ -303,7 +295,7 @@ Finally, with marshaling arrays, a JSON property with an array can be marshalled
 >   public readonly primaryProfile: number
 >
 >   // ...
->   
+>
 >   @jsonAliasProperty('profiles', [Number])
 >   public readonly profiles: Array<number>
 > ```
