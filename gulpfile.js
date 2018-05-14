@@ -55,6 +55,7 @@ gulp.task("build-lib", function() {
     const project = tsc.createProject("tsconfig.json", {
         module : "commonjs",
         target: 'es2016',
+        noEmitOnError: false,
         typescript: require("typescript")
     });
 
@@ -62,9 +63,6 @@ gulp.task("build-lib", function() {
             SRC_GLOB
         ])
         .pipe(project())
-        .on("error", function (err) {
-            //process.exit(1);
-        })
         .js.pipe(gulp.dest("lib"));
 });
 
@@ -83,9 +81,6 @@ gulp.task("build-dts", function() {
             SRC_GLOB
         ])
         .pipe(project())
-        .on("error", function (err) {
-            process.exit(1);
-        })
         .dts.pipe(gulp.dest("dts"));
 });
 
@@ -119,8 +114,6 @@ gulp.task("install", (done) => {
         done
     );
 });
-
-
 
 //
 // Test
