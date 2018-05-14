@@ -38,7 +38,9 @@ export class JsonDecoderValidationError extends JsonDecoderError {
      * @param [message=undefined] - custom error message
      */
     constructor(errors: JsonValidationError[], json: JsonObject, message?: string) {
-        super(message || `JSON validation failed with ${errors.length} issues`)
+        super(message || (!errors || errors.length <= 1)
+            ? 'JSON validation failed'
+            : `JSON validation failed with ${errors.length} issues`)
 
         this.json = json
         this.validationErrors = [...errors]
