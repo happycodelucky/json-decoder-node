@@ -21,7 +21,8 @@ import { JsonObject } from './json-decodable-types'
 import { JsonDecoderValidationError } from './json-decoder-errors'
 import { JsonDecodableOptions, JsonDecodableSchema, JsonDecoderSchemaMetadata } from './json-decorators'
 import { JsonDecoderMetadataKeys } from './json-symbols'
-import { JsonValidationError, JsonValidatorPropertyMissingError, JsonValidatorPropertyValueError, JsonValidatorPropertyUnsupportedError } from './json-validation-errors'
+import { JsonValidationError, JsonValidatorPropertyValueError } from './json-validation-errors'
+import { JsonValidatorPropertyMissingError, JsonValidatorPropertyUnsupportedError } from './json-validation-errors'
 
 /**
  * JSON decoder for JSON decodable classes
@@ -30,9 +31,9 @@ import { JsonValidationError, JsonValidatorPropertyMissingError, JsonValidatorPr
 export class JsonDecoder {
     /**
      * Decodes a JSON object or String returning back the object if it was able to be decoded
-     * @param objectOrString - JSON object or string to decode
-     * @param classType - Decodeable class type
-     * @return results of the decoding
+     * @param objectOrString - array or string (contain JSON object) to decode
+     * @param classType - decodable type to decode JSON into
+     * @return a decoded object of `classType`
      */
     static decode<T extends object>(objectOrString: string | JsonObject, classType: DecoderPrototypalTarget): T | null {
         if (objectOrString === null || objectOrString === undefined) {
@@ -172,8 +173,9 @@ export class JsonDecoder {
 
     /**
      * Decodes a JSON object or String returning back the object if it was able to be decoded
-     * @param object
-     * @return
+     * @param objectOrString - array or string (contain JSON array) to decode
+     * @param classType - decodable type to decode JSON into
+     * @return an array of decoded objects of `classType`
      */
     static decodeArray<T extends object>(
         objectOrString: string | JsonObject[],
@@ -426,7 +428,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                                         if (property === 'propertyPath') {
                                             // @ts-ignore
                                             if (!errorParam[property]) {
-                                                value = 'root object'
+                                                value = 'object'
                                             }
                                         }
                                         if (!value) {
@@ -481,7 +483,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
  * Create a new schema validator for a target. If the target does not support JSON schema no validator function will be returned
  *
  * @param target - target class to take defined schema, and schema references from
- * @returns
+ * @returns validator function to validate schemas with, or undefined if there is no validation needed
  */
 function createSchemaValidator(target: DecoderPrototypalTarget): ajv.ValidateFunction | undefined {
     const metadataSchema: JsonDecoderSchemaMetadata = Reflect.getMetadata(JsonDecoderMetadataKeys.schema, target)
