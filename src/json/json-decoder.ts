@@ -395,7 +395,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                         propertyPath = convertJsonPointerToKeyPath(error.dataPath)
                         templateErrorMessage = propertyPath
                             ? `'${propertyPath}' ${error.message}`
-                            : templateErrorMessage = `Root object ${error.message}`
+                            : templateErrorMessage = `Object ${error.message}`
                     }
 
                     if (ajvError) {
