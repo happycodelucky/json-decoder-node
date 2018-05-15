@@ -1,16 +1,16 @@
-/**
- * @module json-decoder
- */
-
 import * as chai from 'chai'
-import { context, skip, suite, test, timeout, only } from 'mocha-typescript'
-import { toArray } from '../../lib/marshallers/array-marshaller'
+import { toArray } from '../../src/marshallers/array-marshaller'
+
+// @ts-ignore
+import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
 
 // Set up chai
 const expect = chai.expect
+chai.should()
 
 @suite('Unit: toArray')
-class ArrayTests {
+// @ts-ignore
+export class ArrayTests {
 
     @test('undefined tests')
     testUndefined() {
@@ -23,11 +23,11 @@ class ArrayTests {
 
     @test('null tests')
     testNull() {
-        expect(toArray(null)).to.be.deep.equal([null])
+        expect(toArray(null)).to.be.undefined
 
         // Strict mode
 
-        expect(toArray(null, undefined, true)).to.be.deep.equal([null])
+        expect(() => toArray(null, undefined, true)).to.throw(TypeError)
     }
 
     @test('value tests')
@@ -46,38 +46,38 @@ class ArrayTests {
         const value2 = {
             name: 'foo',
             other: {
-                bar: 1
-            }
+                bar: 1,
+            },
         }
         expect(toArray(value2)).to.be.deep.equal([value2])
-    } 
-    
+    }
+
     @test('array value tests')
     testArrayValues() {
-        const value1 = []
+        const value1: any[] = []
         expect(toArray(value1)).to.be.equal(value1)
 
-        const value2 = [0]
+        const value2: any[] = [0]
         expect(toArray(value2)).to.be.equal(value2)
 
-        const value3 = [1]
+        const value3: any[] = [1]
         expect(toArray(value3)).to.be.equal(value3)
 
-        const value4 = ['']
+        const value4: any[] = ['']
         expect(toArray(value4)).to.be.equal(value4)
 
-        const value5 = ['foo']
+        const value5: any[] = ['foo']
         expect(toArray(value5)).to.be.equal(value5)
 
-        const value6 = [{}]
+        const value6: any[] = [{}]
         expect(toArray(value6)).to.be.equal(value6)
 
-        const value7 = [{
+        const value7: any[] = [{
             name: 'foo',
             other: {
-                bar: 1
-            }
+                bar: 1,
+            },
         }]
         expect(toArray(value7)).to.be.equal(value7)
-    } 
+    }
 }

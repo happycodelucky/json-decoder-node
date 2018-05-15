@@ -4,11 +4,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "json-decoder",
+            "label": "build",
             "type": "typescript",
             "tsconfig": "tsconfig.json",
             "isBackground": true,
-            "problemMatcher": "$tsc-watch",
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "option": "watch",
             "presentation": {
                 "echo": true,
                 "reveal": "silent",

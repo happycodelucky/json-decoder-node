@@ -7,13 +7,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Main.js",
-            "program": "${workspaceRoot}/dist/examples/test.js",
+            "protocol": "inspector",
+            "name": "Launch Test",
+            "program": "${workspaceRoot}/dev/examples/test.js",
             "cwd": "${workspaceRoot}",
             "sourceMaps": true,
             "showAsyncStacks": true,
             "smartStep": false,
-            "protocol": "inspector"
         },
         {
             "type": "node",
@@ -32,6 +32,6 @@
                 "-t", "100000"
             ],
             "internalConsoleOptions": "openOnSessionStart"
-        }  
+        }
     ]
 }
