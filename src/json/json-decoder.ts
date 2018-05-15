@@ -156,14 +156,23 @@ export class JsonDecoder {
             // Check for a after decode prototype function
             const decoderComplete = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderCompleted, constructor.prototype)
             if (decoderComplete) {
-                const completeObject: any = decoderComplete.call(decodeObject, object)
-                // Check for invalidation
-                if (completeObject === null) {
-                    return null
-                }
-                // Check for swapped decode object
-                if (completeObject && completeObject !== decodeObject) {
-                    decodeObject = completeObject
+                try {
+                    const completeObject: any = decoderComplete.call(decodeObject, object)
+                    // Check for invalidation
+                    if (completeObject === null) {
+                        return null
+                    }
+                    // Check for swapped decode object
+                    if (completeObject && completeObject !== decodeObject) {
+                        decodeObject = completeObject
+                    }
+                } catch (err) {
+                    if (err instanceof JsonValidationError) {
+                        const validationError = new JsonDecoderValidationError([err], object, 'JSON validation failed post decode')
+                        throw validationError
+                    }
+
+                    throw err
                 }
             }
         }
