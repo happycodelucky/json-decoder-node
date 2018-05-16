@@ -30,6 +30,11 @@ collectionMarshallers.set(Array, toArray)
 collectionMarshallers.set(Map, toMap)
 collectionMarshallers.set(Set, toSet)
 
+// Convert collection marshaller to regular marshallers for type marshalling without item marshalling
+collectionMarshallers.forEach((marshaller: CollectionMarshallerFunction, key: DecoderPrototypalTarget) => {
+    marshallers.set(key, convertCollectionMarshallerToMarshaller(marshaller))
+})
+
 /**
  * Function interface for simple marshallers
  */
@@ -62,4 +67,16 @@ export interface CollectionMarshallerFunction {
  */
 export function collectionMarshallerForType(type: DecoderPrototypalTarget): CollectionMarshallerFunction | undefined {
     return collectionMarshallers.get(type)
+}
+
+/**
+ * Converts a collection marshaller to a standard marshaller function
+ *
+ * @param marshaller - collection marshaller to convert
+ * @return non collection marshaller function
+ */
+function convertCollectionMarshallerToMarshaller(marshaller: CollectionMarshallerFunction): MarshallerFunction {
+    return (value: any, strict?: boolean): any => {
+        return marshaller(value, (item) => item, strict)
+    }
 }
