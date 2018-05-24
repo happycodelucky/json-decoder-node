@@ -8,7 +8,7 @@ import * as ajv from 'ajv'
 // @ts-ignore
 import * as ajvErrors from 'ajv-errors'
 
-import { ErrorObject, RequiredParams, ValidateFunction, AdditionalPropertiesParams } from 'ajv'
+import { AdditionalPropertiesParams, ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
 
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
@@ -159,7 +159,7 @@ export class JsonDecoder {
                 try {
                     const completeObject: any = decoderComplete.call(decodeObject, object)
                     // Check for invalidation
-                    if (completeObject === null) {
+                    if (completeObject === null || completeObject === false) {
                         return null
                     }
                     // Check for swapped decode object
@@ -244,7 +244,14 @@ function createMarshaller(type: DecoderPrototypalTarget | DecoderPrototypalColle
             return undefined;
         }
 
-        const elementMarshaller = createMarshaller(type.element)
+        let elementMarshaller = createMarshaller(type.element)
+
+        // If the element type is decodable
+        if (!elementMarshaller && Reflect.getMetadata(DecoderMetadataKeys.decodable, type.element)) {
+            elementMarshaller = (value: any, strict?: boolean) => {
+                return JsonDecoder.decode<typeof type>(value, type.element as DecoderPrototypalTarget)
+            }
+        }
 
         return (value: any, strict?: boolean) => {
             return collectionMarshaller!(value, elementMarshaller, strict)
