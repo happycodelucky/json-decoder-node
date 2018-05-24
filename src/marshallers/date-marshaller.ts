@@ -25,16 +25,20 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
     }
 
     if (typeof value === 'string') {
-        const timestamp = Date.parse(value)
-        if (Number.isNaN(timestamp)) {
-            if (strict) {
-                throw new TypeError(`'${value}' is not a valid URL`)
+        if (/^[\\d]+$/) {
+            value = Number.parseInt(value, 10)
+        } else {
+            const timestamp = Date.parse(value)
+            if (Number.isNaN(timestamp)) {
+                if (strict) {
+                    throw new TypeError(`'${value}' is not a valid URL`)
+                }
+
+                return undefined
             }
 
-            return undefined
+            return new Date(timestamp)
         }
-
-        return new Date(timestamp)
     }
 
     if (typeof value === 'number') {
