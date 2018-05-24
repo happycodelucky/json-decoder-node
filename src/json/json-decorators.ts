@@ -186,8 +186,8 @@ export function jsonPropertyAlias(keyPath: string) {
  *   @jsonType(String, (value: string) => new RegEx.compile(value))
  *   private pattern: RegEx
  *
- * @param type
- * @param mapFunction
+ * @param type - marshallable type
+ * @param [mapFunction] - optional function taking an instance of `type`
  */
 export function jsonType(
     type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget,
