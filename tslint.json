@@ -16,7 +16,7 @@
         "callable-types": false,
         "completed-docs": [true, "classes", "enums", "enum-members", "functions", "interfaces", "properties", "types"],
         "curly": true,
-        "cyclomatic-complexity": [true, 32],
+        "cyclomatic-complexity": [true, 33],
         "deprecation": true,
         "encoding": true,
         "ban": false,
