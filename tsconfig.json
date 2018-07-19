@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "alwaysStrict": true,
+        "declaration": true,
+        "declarationDir": "dts",
         "experimentalDecorators": true,
         "importHelpers": false,
         "inlineSourceMap": true,
@@ -9,20 +11,20 @@
         "noEmitOnError": false,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
-        "outDir": "dev",
+        "outDir": "lib",
         "pretty": true,
         "removeComments": true,
         "strict": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
         "stripInternal": true,
-        "target": "es2017",
+        "target": "es6",
         "traceResolution": false,
         "types": ["ajv", "mocha", "node", "reflect-metadata"],
     },
     "compileOnSave": true,
     "include": [
-        "src/**/*.*"
+        "src/**/*"
     ],
     "exclude":[
         "node_modules"

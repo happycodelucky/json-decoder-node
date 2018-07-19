@@ -28,7 +28,7 @@ export interface DecoderMapEntry {
  * Decoder configuration map
  * A key/entry pair for properties to map JSON properties to decoded object properties
  */
-export interface DecoderMap extends Record<string, DecoderMapEntry | undefined>{
+export interface DecoderMap extends Record<string | number | symbol, DecoderMapEntry | undefined>{
 
 }
 
@@ -40,7 +40,8 @@ export interface DecoderMap extends Record<string, DecoderMapEntry | undefined>{
  * @return decoder map object to assign JSON decoding configuration to
  */
 export function decoderMapForTarget(target: DecoderPrototypalTarget): DecoderMap {
-    const map = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target) || target[DecoderMetadataKeys.decoderMap]
+    const map = Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target) ||
+        Reflect.get(target, DecoderMetadataKeys.decoderMap)
     if (map) {
         return map
     }

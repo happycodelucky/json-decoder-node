@@ -1,13 +1,28 @@
 # JSON Decoder
 
-![TypeScript Version](https://img.shields.io/badge/typescript-2.8.3-blue.svg)
+![TypeScript Version](https://img.shields.io/badge/typescript-2.9.2-blue.svg)
 ![Code Style](https://img.shields.io/badge/codestyle-TypeScript-green.svg)
-![](https://img.shields.io/badge/node-8.11.1-green.svg)
+![](https://img.shields.io/badge/node-10.5.2-green.svg)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pryomoax/json-decoder/master/LICENSE)
 
 `json-decoder` allows TypeScript and JavaScript projects to adorn class declarations with JSON decoding decorators to support automatic decoding and marshalling of JSON objects to full prototype objects.
 
 **This module is not read for consumption and is a work in progress**
+
+## JavaScript Can Use JSON?
+
+Of course it can, and the CommonJS module loader of Node.js even makes it easy to use `require('file.json')` so even loading JSON is easy!
+
+With ES6, JavaScript introduced classes. And TypeScript uses classes way more as a first class citizen. Well in JavaScript it's simply to adopt a class prototype, and in TypeScript interfaces give JSON types.
+
+It seems like there's isn't too much utility in `json-decoder`? These existing mechcanisms are just fine if they work for you, but there are limitations of JSON:
+- You get everything, not just what you want (all those extra properties)
+- JSON properties might not be named appropriately or desired for your class needs
+- JSON properties are limited in types, no support for `Map`, `Set`, `URL`, `Dates` or custom types
+- JSON property values might need coercing, where there is a `String`, maybe a `Number`, or an object needs to be a custom object
+- You may need a single property value pulled up from a sub-object property, or a single element of an array.
+- Custom translation functions called to covert values
+- And more...
 
 ## Release Notes
 
@@ -19,27 +34,44 @@
 
 ### Installation
 
-To install the module use either [`npm`](npmjs.org) or [`yarn`](https://yarnpkg.com).
+To install the module use either  [`yarn`](https://yarnpkg.com) or [`npm`](npmjs.org)
 
 #### yarn
 
 > ```bash
-> $ yarn add git+https://github.com/pryomoax/json-decoder
+> $ yarn add json-decoder
 > ```
 
 #### npm
 
 > ```bash
-> $ npm install -S git+https://github.com/pryomoax/json-decoder
+> $ npm install -S json-decoder
 > ```
 
 ## Modern Decorators
 
-[Decorators for Javascript](https://github.com/tc39/proposal-decorators) are not formally part of the ES standard, but are natively supported through Babel or TypeScript. `json-decoder` uses decorators as its primary declartive syntax to attach semantics to class declarations.
+[Decorators for Javascript](https://github.com/tc39/proposal-decorators) are not formally part of the ES standard (yet), but are natively supported through Babel or TypeScript. `json-decoder` uses decorators as its primary declartive syntax to attach semantics to class declarations.
 
-It is possible to use `json-decoder` with pure JavaScript using explicit functions but not all things are supported.
+It is possible to use `json-decoder` with pure JavaScript using explicit functions but support is limited.
 
-## Simple Declarations
+
+### Reflect Metadata
+
+[Reflect metadata](https://github.com/rbuckton/reflect-metadata) additions are not yet formally part of EcmaScript so are not available in JavaScript or Node.js. `reflect-metadata` is a package that must only be installed once per project. As such, it's is included here as a peer dependency. Any module using `lechmere-client` must relay this so any other module, or the destination application can import the desired version.
+
+To install in any project, use:
+
+> ```bash
+> $ yarn add reflect-metadata
+> ```
+
+To install in any model, use:
+
+> ```bash
+> $ yarn add --peer reflect-metadata
+> ```
+
+## Simple Decoding
 
 Simpliest of all declarations is to declare a class as JSON decodable by using the `@jsonDecoable` class decorator. This is required to declare decoding support.
 
