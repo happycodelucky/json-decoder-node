@@ -150,5 +150,3 @@ node_modules
 # Generared sources
 dev
 dist
-dts
-lib
