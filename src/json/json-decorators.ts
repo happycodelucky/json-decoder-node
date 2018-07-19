@@ -110,6 +110,14 @@ export function jsonContext<T extends DecoderConstructableTarget>(target: T, key
     debug(`${target.constructor.name} applying jsonContext to ${key}`)
     Reflect.defineMetadata(JsonDecoderMetadataKeys.context, key, target.constructor)
 
+    const descriptor = Reflect.getOwnPropertyDescriptor(target, key)
+    Reflect.defineProperty(target, key, {
+        configurable: true,
+        writable: true,
+        enumerable: false,
+        value: !!descriptor ? descriptor.value : undefined,
+    })
+
     // defined toJSON if not already defined
     if (!('toJSON' in target)) {
         target['toJSON'] = function toJSON() {
