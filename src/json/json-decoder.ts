@@ -87,7 +87,11 @@ export class JsonDecoder {
         // Check if a context needs to be set
         const contextKey = Reflect.getMetadata(JsonDecoderMetadataKeys.context, classType)
         if (contextKey) {
-            decodeObject[contextKey] = object
+            Reflect.defineProperty(decodeObject, contextKey, {
+                value: object,
+                enumerable: false,
+                writable: false,
+            })
         }
 
         // Walk the prototype chain, adding the constructor functions in reverse order
