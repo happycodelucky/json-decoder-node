@@ -115,7 +115,7 @@ export class JsonDecoder {
             // Look up decoder map for the constructor function
             const decoderMap = decoderMapForTarget(constructor)
             for (const key of Reflect.ownKeys(decoderMap)) {
-                const mapEntry = decoderMap[key] as DecoderMapEntry
+                const mapEntry = Reflect.get(decoderMap, key) as DecoderMapEntry
                 const value = evaluatePropertyValue(object, mapEntry, decodeObject)
                 if (value !== undefined) {
                     decodeObject[key] = value
@@ -581,7 +581,7 @@ function flattenSchemaReferences(
         const decoderMap = Reflect.getMetadata(DecoderMetadataKeys.decoderMap, target) as DecoderMap | undefined
         if (decoderMap) {
             for (const key of Reflect.ownKeys(decoderMap)) {
-                const mapEnty = decoderMap[key]
+                const mapEnty = Reflect.get(decoderMap, key)
                 if (mapEnty && mapEnty.type && Reflect.hasMetadata(JsonDecoderMetadataKeys.schema, mapEnty.type)) {
                     schemas.push(...flattenSchemaReferences(mapEnty.type as DecoderPrototypalTarget, true))
                 }
