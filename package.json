@@ -1,6 +1,6 @@
 {
   "name": "json-decoder",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "main": "lib/index.js",
   "types": "dts/index.d.ts",
   "license": "MIT",
