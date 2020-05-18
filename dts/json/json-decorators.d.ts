@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { DecoderConstructableTarget, DecoderPrototypalTarget } from '../decoder/decoder-declarations';
 import { DecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations';
-import { JsonConvertable } from './json-decodable-types';
+import { JsonConvertable, JsonObject } from './json-decodable-types';
 export interface JsonDecodableOptions {
     strict?: boolean;
     useConstructor?: boolean;
@@ -16,7 +16,9 @@ export interface JsonDecoderSchemaMetadata {
     references?: (JsonDecodableSchema | DecoderPrototypalTarget)[];
 }
 export declare function jsonSchema(schema: JsonDecodableSchema, ...references: (JsonDecodableSchema | DecoderPrototypalTarget)[]): <T extends DecoderPrototypalTarget>(target: T) => T;
-export declare function jsonContext<T extends DecoderConstructableTarget>(target: T, key: string): void;
+export declare function jsonContext<T extends DecoderConstructableTarget & {
+    toJSON(): JsonObject;
+}>(target: T, key: string): void;
 export declare function jsonProperty<T extends DecoderConstructableTarget>(target: T, key: string): void;
 export declare function jsonPropertyAlias(keyPath: string): (target: DecoderConstructableTarget, key: string) => void;
 export declare function jsonType(type: DecoderPrototypalTarget | DecoderPrototypalCollectionTarget, mapFunction?: (value: any) => any): (target: DecoderConstructableTarget, key: string) => void;
