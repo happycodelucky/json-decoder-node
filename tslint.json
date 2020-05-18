@@ -14,7 +14,7 @@
             "ignore-words": ["HACK", "REVIEW", "TODO"]
         }],
         "callable-types": false,
-        "completed-docs": [true, "classes", "enums", "enum-members", "functions", "interfaces", "properties", "types"],
+        "completed-docs": false,
         "curly": true,
         "cyclomatic-complexity": false,
         "deprecation": true,
@@ -75,6 +75,7 @@
         "no-namespace": true,
         "no-non-null-assertion": false,
         "no-null-keyword": false,
+        "no-null-undefined-union": false,
         "no-object-literal-type-assertion": true,
         "no-parameter-properties": true,
         "no-parameter-reassignment": false,
@@ -132,8 +133,8 @@
         "semicolon": false,
         "space-before-function-paren": [true, "never"],
         "space-within-parens": [true, "never"],
-        "strict-boolean-expressions": [true, "allow-null-union", "allow-undefined-union"],
-        "strict-type-predicates": true,
+        "strict-boolean-expressions": false,
+        "strict-type-predicates": false,
         "switch-default": false,
         "switch-final-break": true,
         "trailing-comma": [true, {

@@ -9,7 +9,7 @@ import * as createDebugLog from 'debug'
 import { DecoderConstructableTarget, DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
 import { DecoderMapEntry, decoderMapEntryForTarget } from '../decoder/decoder-map'
-import { JsonConvertable } from './json-decodable-types'
+import { JsonConvertable, JsonObject } from './json-decodable-types'
 import { JsonDecoderMetadataKeys } from './json-symbols'
 
 // Debug logger
@@ -106,7 +106,7 @@ export function jsonSchema(schema: JsonDecodableSchema, ...references: (JsonDeco
  *   @jsonContext
  *   private json: JsonObject
  */
-export function jsonContext<T extends DecoderConstructableTarget>(target: T, key: string) {
+export function jsonContext<T extends DecoderConstructableTarget & { toJSON(): JsonObject }>(target: T, key: string) {
     debug(`${target.constructor.name} applying jsonContext to ${key}`)
     Reflect.defineMetadata(JsonDecoderMetadataKeys.context, key, target.constructor)
 
@@ -167,11 +167,9 @@ export function jsonPropertyAlias(keyPath: string) {
     }
 
     return (target: DecoderConstructableTarget, key: string) => {
-        const decoderMap = decoderMapEntryForTarget(key, target.constructor);
-        if (keyPath) {
-            // TODO: Compile the path here instead of each decode
-            decoderMap.key = keyPath
-        }
+        const decoderMap = decoderMapEntryForTarget(key, target.constructor)
+        // TODO: Compile the path here instead of each decode
+        decoderMap.key = keyPath
     }
 }
 
@@ -311,10 +309,11 @@ export function jsonNotify(keyPath: string, type?: DecoderPrototypalTarget | Dec
     return <T extends DecoderConstructableTarget>(target: T, key: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
         debug(`${target.constructor.name} applying jsonPropertyHandler ${keyPath} to ${key}`)
 
-        let notifiers: Map<string, DecoderMapEntry[]> = Reflect.getOwnMetadata(
+        let notifiers = Reflect.getOwnMetadata(
             DecoderMetadataKeys.decoderNotifiers,
             target.constructor,
-        )
+        ) as Map<string, DecoderMapEntry[]> | undefined
+
         if (!notifiers) {
             notifiers = new Map()
             Reflect.defineMetadata(DecoderMetadataKeys.decoderNotifiers, notifiers, target.constructor)
@@ -327,7 +326,7 @@ export function jsonNotify(keyPath: string, type?: DecoderPrototypalTarget | Dec
         propertyNotifiers.push({
             key: keyPath,
             type,
-            mapFunction: descriptor.value,
+            mapFunction: descriptor.value as ((value: any) => any) | undefined,
         })
 
         return descriptor

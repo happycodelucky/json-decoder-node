@@ -44,7 +44,7 @@ export class JsonDecoder {
         let object: object
         if (typeof objectOrString === 'string') {
             // Will throw an exception if the JSON has a syntax error
-            object = JSON.parse(objectOrString)
+            object = JSON.parse(objectOrString) as JsonObject
         } else if (Array.isArray(objectOrString) || typeof objectOrString === 'object') {
             // Arrays are objects too, and can be queried with @0.value
             object = objectOrString
@@ -52,12 +52,12 @@ export class JsonDecoder {
             throw new TypeError('decode(object) should be an Object or a String')
         }
 
-        let decodeObject
+        let decodeObject: T | undefined | null
 
         // Create our decoding object using a decoder function if registered
-        const objectFactory = Reflect.getMetadata(DecoderMetadataKeys.decoderFactory, classType)
+        const objectFactory = Reflect.getMetadata(DecoderMetadataKeys.decoderFactory, classType) as Function | undefined
         if (objectFactory) {
-            decodeObject = objectFactory.call(classType, object)
+            decodeObject = objectFactory.call(classType, object) as T
 
             // Check for invalidation
             if (decodeObject === null) {
@@ -69,11 +69,12 @@ export class JsonDecoder {
                 classType = decodeObject.constructor
             }
         }
+
         if (!decodeObject) {
             const options = Reflect.getOwnMetadata(DecoderMetadataKeys.decodableOptions, classType) as JsonDecodableOptions | undefined
-            if (options && options.useConstructor) {
+            if (options && (options.useConstructor ?? false)) {
                 const constructable = classType as ObjectConstructor
-                decodeObject = new constructable()
+                decodeObject = new constructable() as T
             } else {
                 // Instantiate the object, without calling the constructor
                 decodeObject = Object.create(classType.prototype) as T
@@ -85,8 +86,8 @@ export class JsonDecoder {
         validatedSourceJson(classType, object)
 
         // Check if a context needs to be set
-        const contextKey = Reflect.getMetadata(JsonDecoderMetadataKeys.context, classType)
-        if (contextKey) {
+        const contextKey = Reflect.getMetadata(JsonDecoderMetadataKeys.context, classType) as string | undefined
+        if (contextKey !== undefined && contextKey.length > 0) {
             Reflect.defineProperty(decodeObject, contextKey, {
                 value: object,
                 enumerable: false,
@@ -107,7 +108,7 @@ export class JsonDecoder {
         // Iterate through the class heirarchy
         for (const constructor of classConstructors) {
             // Check for a before decode function on a constructor function's prototype
-            const decoder = Reflect.getOwnMetadata(DecoderMetadataKeys.decoder, constructor.prototype)
+            const decoder = Reflect.getOwnMetadata(DecoderMetadataKeys.decoder, constructor.prototype) as Function
             if (decoder) {
                 const alternativeDecodeObject = decoder.call(decodeObject, object)
                 // Check for invalidation
@@ -122,7 +123,7 @@ export class JsonDecoder {
                 const mapEntry = Reflect.get(decoderMap, key) as DecoderMapEntry
                 const value = evaluatePropertyValue(object, mapEntry, decodeObject)
                 if (value !== undefined) {
-                    decodeObject[key] = value
+                    Reflect.set(decodeObject, key, value)
                 }
             }
         }
@@ -130,10 +131,11 @@ export class JsonDecoder {
         // Iterate through the class heirarchy for prototype decoders, this time calling all the property notifiers
         // This is done after all mapped properties have been assigned
         for (const constructor of classConstructors) {
-            const propertyNotifiers: Map<string, DecoderMapEntry[]> = Reflect.getOwnMetadata(
+            const propertyNotifiers = Reflect.getOwnMetadata(
                 DecoderMetadataKeys.decoderNotifiers,
                 constructor,
-            )
+            ) as Map<string, DecoderMapEntry[]> | undefined
+
             if (propertyNotifiers) {
                 for (const handlers of propertyNotifiers.values()) {
                     for (const handler of handlers) {
@@ -181,7 +183,7 @@ export class JsonDecoder {
             }
         }
 
-        return decodeObject
+        return decodeObject!
     }
 
     /**
@@ -209,7 +211,39 @@ export class JsonDecoder {
 
         return objects.map<T | null>((object) => this.decode<T>(object, classType)).filter((object) => !!object) as [T]
     }
+
+    /**
+     * Decodes a JSON object or String returning back a map with key as the
+     * json key and value decoded to the decodable type passed in the input
+     * @param objectOrString - array or string (contain JSON array) to decode
+     * @param classTypeOfValue - decodable type of json values to decode JSON into
+     * @return a Map with the value containing decoded objects of `classType`
+     */
+    static decodeMap<T extends object>(
+        objectOrString: string | JsonObject,
+        classTypeOfValue: DecoderPrototypalTarget,
+    ): Map<string, T> | null  {
+        if (objectOrString === null || objectOrString === undefined) {
+            return null
+        }
+
+        const inputObject: JsonObject = (typeof(objectOrString) === 'string')
+            ? JSON.parse(objectOrString)
+            : objectOrString
+
+        const decodedMap: Map<string, T > = new Map()
+        for (const key of Reflect.ownKeys(inputObject)) {
+            const decodedValue = this.decode<T>(inputObject[key.toString()], classTypeOfValue)
+            if (decodedValue) {
+                decodedMap.set(key.toString(), decodedValue)
+            }
+        }
+
+        return decodedMap
+    }
 }
+
+
 
 //
 // Private functions

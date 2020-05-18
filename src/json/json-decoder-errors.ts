@@ -8,10 +8,12 @@ export class JsonDecoderError extends Error {
     /**
      * @param message - error message
      */
+    // tslint:disable-next-line:no-unsafe-any
     constructor(message: string, name: string = new.target.name) {
         super(message)
 
         // Correct prototype overridden by Error
+        // tslint:disable-next-line:no-unsafe-any
         Reflect.setPrototypeOf(this, new.target.prototype);
 
         this.name = name

@@ -4,6 +4,7 @@
  * Type and interfaces to support decoder mapping
  */
 
+import { JsonObject } from '../json/json-decodable-types'
 import { DecoderMetadataKeys, DecoderPrototypalCollectionTarget, DecoderPrototypalTarget } from './decoder-declarations'
 
 /**
@@ -21,7 +22,7 @@ export interface DecoderMapEntry {
     /**
      * Map function taking the marshaled value (array, object or scalar) and applies another level of mapping
      */
-    mapFunction?(value: any): any
+    mapFunction?(value: any, object: JsonObject): any
 }
 
 /**
@@ -49,7 +50,7 @@ export function decoderMapForTarget(target: DecoderPrototypalTarget): DecoderMap
     // Set an empty decoder map
     Reflect.defineMetadata(DecoderMetadataKeys.decoderMap, {}, target)
 
-    return Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target)!
+    return Reflect.getOwnMetadata(DecoderMetadataKeys.decoderMap, target) as DecoderMap
 }
 
 /**
