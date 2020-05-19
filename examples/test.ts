@@ -1,3 +1,98 @@
+// tslint:disable
+import { jsonDecodable, JsonDecoder, jsonProperty, jsonType } from '..'
+
+/**
+ * The type of authentication represented in SMAPIAuth items
+ */
+export enum SMAPIAuthType {
+    /**
+     * DEPRECATED - session based auth
+     */
+    Session = 'session',
+    /**
+     * token based auth
+     */
+    Token = 'token',
+}
+
+/**
+ * Helpers
+ */
+const smapiAuthTypes = [
+    SMAPIAuthType.Session,
+    SMAPIAuthType.Token,
+]
+/**
+ * Check if a string is a member of SearchCatalogType
+ */
+function isSmapiAuthType(item: string) {
+    return smapiAuthTypes.includes(item as SMAPIAuthType)
+}
+
+/**
+ * SmapiAuth Class
+ */
+@jsonDecodable()
+export class SMAPIAuth {
+
+    /**
+     * SMAPIAuthType
+     */
+    @jsonProperty
+    @jsonType(String, (type) => {
+        if (!isSmapiAuthType(type)) {
+            throw new Error(`invalid SMAPI auth type: ${type}`)
+        }
+
+        return type
+    })
+    readonly type!: SMAPIAuthType
+
+    /**
+     * SMAPIAuth value which can be session id or token value
+     */
+    @jsonProperty
+    @jsonType(String, (value) => {
+        return value
+    })
+    readonly value!: string
+}
+
+/**
+ * SMAPIAuthMap class
+ */
+export class SMAPIAuthMap extends Map<string, SMAPIAuth> {
+    /**
+     * Decodes the base64 encoded header string containing SMAPIAuthMap.
+     * @param header Base64 encoded header
+     */
+    static fromBase64(header: string) {
+        return SMAPIAuthMap.decode(Buffer.from(header, 'base64').toString('ascii'))
+    }
+
+    /**
+     * Decodes the SMAPIAuthMap json object/string into a map of SearchableService->SMAPIAuth
+     */
+    static decode(json: object | string) {
+        const target = (typeof (json) === 'string')
+            ? JSON.parse(json)
+            : json
+
+        return JsonDecoder.decodeMap<SMAPIAuth>(target, SMAPIAuth)!
+    }
+}
+
+const map = SMAPIAuthMap.decode({
+    a: {
+        type: 'token',
+        value: '123',
+    },
+})
+
+console.log(map)
+
+
+
 
 // import { JsonDecoder, jsonDecodable, jsonProperty, jsonType } from '../'
 // import { JsonDecoderValidationError } from '../json/json-decoder-errors'
