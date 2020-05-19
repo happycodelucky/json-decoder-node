@@ -1,17 +1,17 @@
 
-import { JsonDecoder, jsonDecodable, jsonProperty, jsonType } from '../'
-import { JsonDecoderValidationError } from '../json/json-decoder-errors'
+// import { JsonDecoder, jsonDecodable, jsonProperty, jsonType } from '../'
+// import { JsonDecoderValidationError } from '../json/json-decoder-errors'
 
-@jsonDecodable({
-    useConstructor: true,
-})
-class Test {
+// @jsonDecodable({
+//     useConstructor: true,
+// })
+// class Test {
 
-    @jsonProperty
-    @jsonType(Boolean)
-    test: boolean = false
+//     @jsonProperty
+//     @jsonType(Boolean)
+//     test: boolean = false
 
-}
+// }
 
 // // @jsonDecodable()
 // // @jsonSchema({
@@ -196,14 +196,14 @@ class Test {
 
 // }
 
-try {
-    const t = JsonDecoder.decode<Test>({
-      test: '1',
-    }, Test, {
-        lazyDecode: true,
-    })
-    console.log(t!.test)
-    console.log(t!.test)
-} catch (err) {
-    console.error((err as JsonDecoderValidationError).validationErrors[0].message)
-}
+// try {
+//     const t = JsonDecoder.decode<Test>({
+//       test: '1',
+//     }, Test, {
+//         lazyDecode: true,
+//     })
+//     console.log(t!.test)
+//     console.log(t!.test)
+// } catch (err) {
+//     console.error((err as JsonDecoderValidationError).validationErrors[0].message)
+// }
