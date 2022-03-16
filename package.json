@@ -38,7 +38,8 @@
     "reflect-metadata": "*"
   },
   "scripts": {
-    "test": "nyc mocha -r ts-node/register -r test/prepare test/**/*.spec.ts"
+    "build": "rm -rf ./lib; rm -rf ./dts; npx tsc --project ./tsconfig.json",
+    "test": "nyc mocha -r ts-node/register test/**/*.spec.ts"
   },
   "nyc": {
     "extension": [
