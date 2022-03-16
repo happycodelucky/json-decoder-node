@@ -57,7 +57,7 @@ export function jsonDecodable(options?: JsonDecodableOptions) {
 }
 
 /**
- * Json schema as used by a JSON decodeable object
+ * Json schema as used by a JSON decodable object
  * TODO: Use an interface describing the supported schema version (not available in ajv)
  */
 export interface JsonDecodableSchema extends Record<string, any> {
@@ -219,7 +219,7 @@ export function jsonType(
 //
 
 /**
- * Declares a function as being the decoder class factory, returning the class to instatiate with the JSON decoder
+ * Declares a function as being the decoder class factory, returning the class to instantiate with the JSON decoder
  *
  * @example
  *   @jsonDecoderFactory

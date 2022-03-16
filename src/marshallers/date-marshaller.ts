@@ -44,7 +44,7 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
     if (typeof value === 'number') {
         if (Number.isNaN(value) || value < 0) {
             if (strict) {
-                throw new TypeError(`'${value}' is not a valid URL`)
+                throw new TypeError(`'${value}' is not a valid date`)
             }
 
             return undefined
@@ -54,7 +54,7 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
     }
 
     if (strict) {
-        throw new TypeError(`'${value}' is not a valid URL`)
+        throw new TypeError(`'${value}' is not a valid date`)
     }
 
     return undefined
