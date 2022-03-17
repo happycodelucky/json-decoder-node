@@ -102,7 +102,7 @@ export class JsonDecoder {
             if (!!Reflect.getOwnMetadata(DecoderMetadataKeys.decodable, prototype.constructor)) {
                 classConstructors.unshift(prototype.constructor)
             }
-            prototype = Reflect.getPrototypeOf(prototype)
+            prototype = Reflect.getPrototypeOf(prototype)!
         }
 
         // Iterate through the class heirarchy
@@ -402,7 +402,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
     }
 
     // Fetch an existing validator
-    let validator = Reflect.getMetadata(JsonDecoderMetadataKeys.schemaValidator, target) as ValidateFunction | undefined
+    let validator = Reflect.getOwnMetadata(JsonDecoderMetadataKeys.schemaValidator, target) as ValidateFunction | undefined
     // Create a new validator if one has not already been created
     if (!validator) {
         validator = createSchemaValidator(target)
