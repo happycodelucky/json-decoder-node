@@ -1,7 +1,4 @@
 import * as chai from 'chai'
-// import { toURL } from '../../src/marshallers/url-marshaller'
-
-
 import { suite, test } from '@testdeck/mocha'
 import { jsonDecodable, jsonProperty } from '../../src'
 import { JsonDecoder } from '../../src'
