@@ -99,7 +99,7 @@ export function jsonSchema(schema: JsonDecodableSchema, ...references: (JsonDeco
 
 /**
  * JSON context object (the origin JSON) assigned to decoding object
- * Also addes `toJSON()` to return the decoded object back
+ * Also added `toJSON()` to return the decoded object back
  *
  * @example
  *   // Sets the origin JSON to a designated context property
@@ -250,7 +250,7 @@ export function jsonDecoderFactory(target: DecoderPrototypalTarget, key: string,
  *
  * When applied to a prototype function, the decoding object will have been created. The function must return this or
  * a replacement object. Returning undefined will fallback and use the same decoding object already created, returning
- * nulll will invalidate the decoding.
+ * null will invalidate the decoding.
  *
  * Errors thrown here will be propagated
  *

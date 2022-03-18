@@ -1,8 +1,8 @@
 import * as chai from 'chai'
 // import { toURL } from '../../src/marshallers/url-marshaller'
 
-// @ts-ignore
-import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
+
+import { suite, test } from '@testdeck/mocha'
 import { jsonDecodable, jsonProperty } from '../../src'
 import { JsonDecoder } from '../../src'
 
@@ -28,7 +28,7 @@ class T2 {
 @suite('Unit: jsonProperty')
 export class URLTests {
 
-    @test('constructor initalization')
+    @test('constructor initialization')
     testConstructor() {
         const object = JsonDecoder.decode<T>({ }, T)!
         expect(object).to.be.instanceof(T)

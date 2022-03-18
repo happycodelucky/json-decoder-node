@@ -24,7 +24,7 @@ export abstract class JsonValidatorPropertyError extends JsonValidationError {
 
     /**
      * @param propertyPath - path to property
-     * @param property - indepedent property name
+     * @param property - independent property name
      * @param message - error message
      */
     constructor(propertyPath: string, property: string, message: string) {

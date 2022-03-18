@@ -3,12 +3,12 @@
  */
 
 import 'reflect-metadata'
-
-import * as ajv from 'ajv'
+import Ajv from 'ajv'
+// import * as ajv from 'ajv'
 // @ts-ignore
-import * as ajvErrors from 'ajv-errors'
+import ajvErrors from 'ajv-errors'
 
-import { AdditionalPropertiesParams, ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
+import {ErrorObject, ValidateFunction } from 'ajv'
 
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
@@ -437,7 +437,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                         // tslint:disable-next-line:prefer-conditional-expression
                         if ('errors' in params && Array.isArray(params.errors) && params.errors.length > 0) {
                             ajvError = params.errors[0]
-                            propertyPath = convertJsonPointerToKeyPath(ajvError!.dataPath)
+                            propertyPath = convertJsonPointerToKeyPath(ajvError!.instancePath)
                             templateErrorMessage = error.message!
 
                             // Should format the error messages
@@ -448,7 +448,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                             templateErrorMessage = error.message!
                         }
                     } else {
-                        propertyPath = convertJsonPointerToKeyPath(error.dataPath)
+                        propertyPath = convertJsonPointerToKeyPath(error.instancePath)
                         templateErrorMessage = propertyPath
                             ? `'${propertyPath}' ${error.message}`
                             : templateErrorMessage = `Object ${error.message}`
@@ -502,20 +502,19 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                                 validationErrors.push(
                                     new JsonValidatorPropertyMissingError(
                                         propertyPath,
-                                        (errorParam as RequiredParams).missingProperty,
+                                        errorParam.missingProperty,
                                         errorMessage))
                             }else if (ajvError.keyword === 'additionalProperties') {
                                 validationErrors.push(
                                     new JsonValidatorPropertyUnsupportedError(
                                         propertyPath,
-                                        // @ts-ignore
-                                        (errorParam as AdditionalPropertiesParams).additionalProperty,
+                                        errorParam.additionalProperty,
                                         errorMessage))
                             } else {
                                 validationErrors.push(
                                     new JsonValidatorPropertyValueError(
                                         propertyPath,
-                                        valueFromJsonPointer(ajvError!.dataPath, json),
+                                        valueFromJsonPointer(ajvError!.instancePath, json),
                                         errorMessage))
                             }
                         })
@@ -539,19 +538,17 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
  * @param target - target class to take defined schema, and schema references from
  * @returns validator function to validate schemas with, or undefined if there is no validation needed
  */
-function createSchemaValidator(target: DecoderPrototypalTarget): ajv.ValidateFunction | undefined {
+function createSchemaValidator(target: DecoderPrototypalTarget): ValidateFunction | undefined {
     const metadataSchema: JsonDecoderSchemaMetadata = Reflect.getMetadata(JsonDecoderMetadataKeys.schema, target)
     if (!metadataSchema) {
         return undefined
     }
 
     // Schema options
-    const schemaCompiler = ajv({
+    const schemaCompiler = new Ajv({
         allErrors: true,
-        async: false,
         verbose: true,
-        format: 'full',
-        jsonPointers: true, // Required for ajvErrors
+        validateFormats: true,
     })
     ajvErrors(schemaCompiler)
 
