@@ -28,6 +28,27 @@ const otherSchema = {
     }
 }
 
+const schema2019 = {
+    $id: "base-schema",
+    $schema: "https://json-schema.org/draft/2019-09/schema",
+    description: "Base schema",
+    type: "object",
+    additionalProperties: false,
+    properties: {
+        stringVal: { type: "string" }
+    }
+}
+
+const schema2020 = {
+    $id: "base-schema",
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    description: "Base schema",
+    type: "object",
+    additionalProperties: false,
+    properties: {
+        stringVal: { type: "string" }
+    }
+}
 @jsonSchema(schema)
 @jsonDecodable({ useConstructor: true })
 class BaseClass {
@@ -59,6 +80,20 @@ class DerivedClassSchemaOverride extends BaseClass {
 @jsonSchema(otherSchema)
 @jsonDecodable({ useConstructor: true })
 class DerivedClassWithSchema extends BaseClassNoSchema {
+    @jsonProperty
+    numericVal!: number
+}
+
+@jsonSchema(schema2019)
+@jsonDecodable({ useConstructor: true })
+class Schema2019 extends BaseClassNoSchema {
+    @jsonProperty
+    numericVal!: number
+}
+
+@jsonSchema(schema2020)
+@jsonDecodable({ useConstructor: true })
+class Schema2020 extends BaseClassNoSchema {
     @jsonProperty
     numericVal!: number
 }
@@ -108,7 +143,7 @@ export class SchemaTests {
             () => {JsonDecoder.decode<DerivedClassInheritedSchema>({ numericVal: 5 }, DerivedClassInheritedSchema)}
         ).to.throw('JSON validation failed')
     }
- 
+
     @test('derived class with overridden schema validation')
     testDerivedClassOverrideSchemaValidation() {
         const base = JsonDecoder.decode<BaseClass>({ stringVal: 'bar' }, BaseClass)!
@@ -152,4 +187,17 @@ export class SchemaTests {
                 }, DerivedClassWithSchema)}
         ).to.throw('JSON validation failed')
     }
+
+    @test('basic validation - 2019 spec')
+    testValidation2019() {
+        const object = JsonDecoder.decode<Schema2019>({ stringVal: 'bar' }, Schema2019)!
+        expect(object.stringVal).to.equal('bar')
+    }
+
+    @test('basic validation - 2020 spec')
+    testValidation2020() {
+        const object = JsonDecoder.decode<Schema2020>({ stringVal: 'bar' }, Schema2020)!
+        expect(object.stringVal).to.equal('bar')
+    }
+
 }

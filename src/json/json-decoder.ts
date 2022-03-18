@@ -3,7 +3,10 @@
  */
 
 import 'reflect-metadata'
-import Ajv from 'ajv'
+import AjvDraft07 from 'ajv'
+import Ajv2019 from 'ajv/dist/2019'
+import Ajv2020 from 'ajv/dist/2020'
+
 // import * as ajv from 'ajv'
 // @ts-ignore
 import ajvErrors from 'ajv-errors'
@@ -23,6 +26,9 @@ import { JsonDecodableOptions, JsonDecodableSchema, JsonDecoderSchemaMetadata } 
 import { JsonDecoderMetadataKeys } from './json-symbols'
 import { JsonValidationError, JsonValidatorPropertyValueError } from './json-validation-errors'
 import { JsonValidatorPropertyMissingError, JsonValidatorPropertyUnsupportedError } from './json-validation-errors'
+
+const SCHEMA_DRAFT_2019 = 'https://json-schema.org/draft/2019-09/schema'
+const SCHEMA_DRAFT_2020 ='https://json-schema.org/draft/2020-12/schema'
 
 /**
  * JSON decoder for JSON decodable classes
@@ -544,12 +550,22 @@ function createSchemaValidator(target: DecoderPrototypalTarget): ValidateFunctio
         return undefined
     }
 
-    // Schema options
-    const schemaCompiler = new Ajv({
+    const schemaVersion = metadataSchema.schema.$schema
+
+    const schemaCompiler = schemaVersion.startsWith(SCHEMA_DRAFT_2019)
+        ? new Ajv2019()
+        : schemaVersion.startsWith(SCHEMA_DRAFT_2020)
+            ? new Ajv2020()
+            : new AjvDraft07()
+
+    // AJV Options
+    schemaCompiler.opts = {
+        ...schemaCompiler.opts,
         allErrors: true,
         verbose: true,
         validateFormats: true,
-    })
+    }
+
     ajvErrors(schemaCompiler)
 
     // Flatten all the references and ensure there is only one version of each
