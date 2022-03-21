@@ -3,12 +3,15 @@
  */
 
 import 'reflect-metadata'
+import AjvDraft07 from 'ajv'
+import Ajv2019 from 'ajv/dist/2019'
+import Ajv2020 from 'ajv/dist/2020'
 
-import * as ajv from 'ajv'
+// import * as ajv from 'ajv'
 // @ts-ignore
-import * as ajvErrors from 'ajv-errors'
+import ajvErrors from 'ajv-errors'
 
-import { AdditionalPropertiesParams, ErrorObject, RequiredParams, ValidateFunction } from 'ajv'
+import {ErrorObject, ValidateFunction } from 'ajv'
 
 import { DecoderMetadataKeys, DecoderPrototypalTarget } from '../decoder/decoder-declarations'
 import { DecoderPrototypalCollectionTarget, isDecoderPrototypalCollectionTarget } from '../decoder/decoder-declarations'
@@ -23,6 +26,9 @@ import { JsonDecodableOptions, JsonDecodableSchema, JsonDecoderSchemaMetadata } 
 import { JsonDecoderMetadataKeys } from './json-symbols'
 import { JsonValidationError, JsonValidatorPropertyValueError } from './json-validation-errors'
 import { JsonValidatorPropertyMissingError, JsonValidatorPropertyUnsupportedError } from './json-validation-errors'
+
+const SCHEMA_DRAFT_2019 = 'https://json-schema.org/draft/2019-09/schema'
+const SCHEMA_DRAFT_2020 ='https://json-schema.org/draft/2020-12/schema'
 
 /**
  * JSON decoder for JSON decodable classes
@@ -437,7 +443,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                         // tslint:disable-next-line:prefer-conditional-expression
                         if ('errors' in params && Array.isArray(params.errors) && params.errors.length > 0) {
                             ajvError = params.errors[0]
-                            propertyPath = convertJsonPointerToKeyPath(ajvError!.dataPath)
+                            propertyPath = convertJsonPointerToKeyPath(ajvError!.instancePath)
                             templateErrorMessage = error.message!
 
                             // Should format the error messages
@@ -448,7 +454,7 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                             templateErrorMessage = error.message!
                         }
                     } else {
-                        propertyPath = convertJsonPointerToKeyPath(error.dataPath)
+                        propertyPath = convertJsonPointerToKeyPath(error.instancePath)
                         templateErrorMessage = propertyPath
                             ? `'${propertyPath}' ${error.message}`
                             : templateErrorMessage = `Object ${error.message}`
@@ -502,20 +508,19 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
                                 validationErrors.push(
                                     new JsonValidatorPropertyMissingError(
                                         propertyPath,
-                                        (errorParam as RequiredParams).missingProperty,
+                                        errorParam.missingProperty,
                                         errorMessage))
                             }else if (ajvError.keyword === 'additionalProperties') {
                                 validationErrors.push(
                                     new JsonValidatorPropertyUnsupportedError(
                                         propertyPath,
-                                        // @ts-ignore
-                                        (errorParam as AdditionalPropertiesParams).additionalProperty,
+                                        errorParam.additionalProperty,
                                         errorMessage))
                             } else {
                                 validationErrors.push(
                                     new JsonValidatorPropertyValueError(
                                         propertyPath,
-                                        valueFromJsonPointer(ajvError!.dataPath, json),
+                                        valueFromJsonPointer(ajvError!.instancePath, json),
                                         errorMessage))
                             }
                         })
@@ -539,20 +544,28 @@ function validatedSourceJson(target: DecoderPrototypalTarget, json: JsonObject):
  * @param target - target class to take defined schema, and schema references from
  * @returns validator function to validate schemas with, or undefined if there is no validation needed
  */
-function createSchemaValidator(target: DecoderPrototypalTarget): ajv.ValidateFunction | undefined {
+function createSchemaValidator(target: DecoderPrototypalTarget): ValidateFunction | undefined {
     const metadataSchema: JsonDecoderSchemaMetadata = Reflect.getMetadata(JsonDecoderMetadataKeys.schema, target)
     if (!metadataSchema) {
         return undefined
     }
 
-    // Schema options
-    const schemaCompiler = ajv({
+    const schemaVersion = metadataSchema.schema.$schema
+
+    const schemaCompiler = schemaVersion.startsWith(SCHEMA_DRAFT_2019)
+        ? new Ajv2019()
+        : schemaVersion.startsWith(SCHEMA_DRAFT_2020)
+            ? new Ajv2020()
+            : new AjvDraft07()
+
+    // AJV Options
+    schemaCompiler.opts = {
+        ...schemaCompiler.opts,
         allErrors: true,
-        async: false,
         verbose: true,
-        format: 'full',
-        jsonPointers: true, // Required for ajvErrors
-    })
+        validateFormats: true,
+    }
+
     ajvErrors(schemaCompiler)
 
     // Flatten all the references and ensure there is only one version of each

@@ -1,6 +1,5 @@
 import * as chai from 'chai'
-
-import { suite, test } from 'mocha-typescript'
+import { suite, test } from '@testdeck/mocha'
 import { jsonDecodable, jsonProperty } from '../../src'
 import { JsonDecoder } from '../../src'
 

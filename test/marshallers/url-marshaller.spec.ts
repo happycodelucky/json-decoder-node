@@ -3,7 +3,7 @@ import { URL } from 'url'
 import { toURL } from '../../src/marshallers/url-marshaller'
 
 // @ts-ignore
-import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from '@testdeck/mocha'
 
 // Set up chai
 const expect = chai.expect

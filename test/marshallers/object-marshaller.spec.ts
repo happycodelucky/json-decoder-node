@@ -2,7 +2,7 @@ import * as chai from 'chai'
 import { toObject } from '../../src/marshallers/object-marshaller'
 
 // @ts-ignore
-import { context, only, skip, suite, test, timeout } from 'mocha-typescript'
+import { context, only, skip, suite, test, timeout } from '@testdeck/mocha'
 
 // Set up chai
 const expect = chai.expect
