@@ -25,7 +25,7 @@ export function toDate(value: any, strict: boolean = false): Date | undefined {
     }
 
     if (typeof value === 'string') {
-        if (/^[\\d]+$/) {
+        if (/^[\\d]+$/.test(value)) {
             value = Number.parseInt(value, 10)
         } else {
             const timestamp = Date.parse(value)
